@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import User from "@/models/User";
-import {compare} from "bcrypt-ts";
+import { compare } from "bcrypt-ts";
 import jwt from "jsonwebtoken";
 
 export async function POST(req: Request) {
   try {
     await connectDB();
-    const { email, password } = await req.json();
+    const body = await req.json();
+    const email = body.email.toLowerCase().trim();
+    const password = body.password;
 
     // 1. Find user
     const user = await User.findOne({ email });

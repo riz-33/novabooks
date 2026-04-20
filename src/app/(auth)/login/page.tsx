@@ -1,5 +1,6 @@
 "use client";
 
+import Cookies from "js-cookie";
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -27,6 +28,7 @@ export default function LoginPage() {
         // Save data for the dashboard to use
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
+        Cookies.set("token", data.token, { expires: 1 }); 
         router.push("/dashboard");
       } else {
         alert(data.error);
@@ -37,7 +39,7 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
-  
+
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
@@ -70,9 +72,13 @@ export default function LoginPage() {
                   size={18}
                 />
                 <input
-                  type="email"
                   required
+                  type="email"
+                  value={formData.email}
                   placeholder="name@company.com"
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-novaNavy/10 text-novaNavy font-bold placeholder:text-gray-300 transition-all"
                 />
               </div>
@@ -88,9 +94,13 @@ export default function LoginPage() {
                   size={18}
                 />
                 <input
-                  type="password"
                   required
+                  type="password"
                   placeholder="••••••••"
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
                   className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-novaNavy/10 text-novaNavy font-bold placeholder:text-gray-300 transition-all"
                 />
               </div>
