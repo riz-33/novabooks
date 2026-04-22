@@ -15,24 +15,24 @@ export default function ProfilePage() {
     <div className="p-8 max-w-4xl mx-auto">
       <div className="mb-8 flex justify-between items-end">
         <div>
-          <h1 className="text-3xl font-black text-novaNavy">Account Profile</h1>
-          <p className="text-novaGold font-medium text-sm">
+          <h1 className="text-3xl font-black text-nova-navy">Account Profile</h1>
+          <p className="text-nova-gold font-medium text-sm">
             Manage your personal identification.
           </p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-100 rounded-xl text-sm font-bold text-novaNavy hover:bg-gray-50 transition-all shadow-sm">
+        <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-100 rounded-xl text-sm font-bold text-nova-navy hover:bg-gray-50 transition-all shadow-sm">
           <Edit3 size={16} /> Edit Profile
         </button>
       </div>
 
       <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden">
         {/* Banner Decor */}
-        <div className="h-32 bg-gradient-to-r from-novaNavy to-blue-800" />
+        <div className="h-32 bg-gradient-to-r from-nova-navy to-blue-800" />
 
         <div className="px-10 pb-10">
           <div className="relative flex justify-between items-end -mt-12 mb-8">
             <div className="p-1 bg-white rounded-[2rem]">
-              <div className="h-24 w-24 bg-slate-100 rounded-[1.8rem] flex items-center justify-center text-novaNavy border-4 border-white shadow-inner">
+              <div className="h-24 w-24 bg-slate-100 rounded-[1.8rem] flex items-center justify-center text-nova-navy border-4 border-white shadow-inner">
                 <User size={48} />
               </div>
             </div>
@@ -86,7 +86,7 @@ function ProfileField({
           {label}
         </span>
       </div>
-      <p className="text-novaNavy font-bold ml-7">{value}</p>
+      <p className="text-nova-navy font-bold ml-7">{value}</p>
     </div>
   );
 }

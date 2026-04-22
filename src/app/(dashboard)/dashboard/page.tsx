@@ -43,10 +43,10 @@ export default function DashboardPage() {
   return (
     <div className="p-8 max-w-[1600px] mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-black text-novaNavy tracking-tight">
+        <h1 className="text-3xl font-black text-nova-navy tracking-tight">
           Welcome Back
         </h1>
-        <p className="text-novaGold font-medium">
+        <p className="text-nova-gold font-medium">
           Reviewing your modern ledger for small businesses.
         </p>
       </div>
@@ -57,13 +57,13 @@ export default function DashboardPage() {
           <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">
             Total Revenue
           </p>
-          <h2 className="text-3xl font-black text-novaNavy">$1,519,635</h2>
+          <h2 className="text-3xl font-black text-nova-navy">$1,519,635</h2>
         </div>
         <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
           <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">
             Unpaid Invoices
           </p>
-          <h2 className="text-3xl font-black text-novaNavy">21,258</h2>
+          <h2 className="text-3xl font-black text-nova-navy">21,258</h2>
         </div>
         <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
           <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">
@@ -84,7 +84,7 @@ export default function DashboardPage() {
         <div className="lg:col-span-1 space-y-8">
           {/* Bar Chart */}
           <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm">
-            <h3 className="font-bold text-novaNavy mb-6">Monthly Cash Flow</h3>
+            <h3 className="font-bold text-nova-navy mb-6">Monthly Cash Flow</h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={barData}>
                 <CartesianGrid
@@ -133,7 +133,7 @@ export default function DashboardPage() {
         <div className="lg:col-span-1 space-y-8">
           {/* Bar Chart */}
           <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm">
-            <h3 className="font-bold text-novaNavy mb-6">Expense Categories</h3>
+            <h3 className="font-bold text-nova-navy mb-6">Expense Categories</h3>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
@@ -175,23 +175,23 @@ export default function DashboardPage() {
       {/* Right Side: Activity & Actions */}
       <div className="space-y-6">
         <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm h-full">
-          <h3 className="font-bold text-novaNavy mb-6">Quick Actions</h3>
+          <h3 className="font-bold text-nova-navy mb-6">Quick Actions</h3>
           <div className="space-y-3">
             <button className="w-full flex items-center justify-between p-4 rounded-2xl border border-gray-100 hover:bg-gray-50 transition-all group">
               <span className="text-sm font-bold text-gray-600">
                 New Expense
               </span>
-              <Plus size={18} className="text-novaGold" />
+              <Plus size={18} className="text-nova-gold" />
             </button>
             <button className="w-full flex items-center justify-between p-4 rounded-2xl border border-gray-100 hover:bg-gray-50 transition-all group">
               <span className="text-sm font-bold text-gray-600">
                 Generate Report
               </span>
-              <FileText size={18} className="text-novaNavy" />
+              <FileText size={18} className="text-nova-navy" />
             </button>
           </div>
 
-          <h3 className="font-bold text-novaNavy mt-10 mb-6">
+          <h3 className="font-bold text-nova-navy mt-10 mb-6">
             Recent Activity
           </h3>
           <div className="space-y-6">

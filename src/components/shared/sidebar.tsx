@@ -103,13 +103,13 @@ function SidebarIcon({ to, icon, active, label }) {
       title={label}
       className={`p-2 rounded-2xl transition-all duration-300 group  ${
         active
-          ? "bg-novaNavy text-white shadow-lg shadow-novaNavy/20 scale-110"
-          : "text-gray-400 hover:text-novaNavy hover:bg-gray-50"
+          ? "bg-nova-navy text-white shadow-lg shadow-nova-navy/20 scale-110"
+          : "text-gray-400 hover:text-nova-navy hover:bg-gray-50"
       }`}
     >
       {icon}
       {active && (
-        <span className="absolute -right-1 top-1/2 -translate-y-1/2 w-1 h-4 bg-novaGold rounded-full" />
+        <span className="absolute -right-1 top-1/2 -translate-y-1/2 w-1 h-4 bg-nova-gold rounded-full" />
       )}
     </Link>
   );

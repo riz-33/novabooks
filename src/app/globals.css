@@ -3,6 +3,11 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  /* Define your brand hex codes as CSS variables here if you want */
+  --nova-navy: #1e3a8a;
+  --nova-gold: #d4af37;
+  --nova-gold-dark: #b08d2b;
+  --nova-gray: #9ca3af;
 }
 
 @theme inline {
@@ -10,6 +15,12 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* This is where you map the classes for Tailwind v4 */
+  --color-nova-navy: var(--nova-navy);
+  --color-nova-gold: var(--nova-gold);
+  --color-nova-gold-dark: var(--nova-gold-dark);
+  --color-nova-gray: var(--nova-gray);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,5 +33,5 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Outfit, Arial, Helvetica, sans-serif;
 }

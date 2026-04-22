@@ -45,16 +45,16 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-black text-novaNavy tracking-tighter">
+          <h1 className="text-4xl font-black text-nova-navy tracking-tighter">
             NOVABOOKS
           </h1>
-          <p className="text-novaGold font-bold text-xs uppercase tracking-[0.2em] mt-2">
+          <p className="text-nova-gold font-bold text-xs uppercase tracking-[0.2em] mt-2">
             Join the Modern Ledger
           </p>
         </div>
 
         <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-2xl shadow-blue-900/5">
-          <h2 className="text-2xl font-black text-novaNavy mb-2">
+          <h2 className="text-2xl font-black text-nova-navy mb-2">
             Create Account
           </h2>
           <p className="text-gray-400 text-sm mb-8 font-medium">
@@ -96,7 +96,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-4 bg-novaNavy text-white py-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-blue-900 transition-all shadow-lg shadow-blue-900/20 disabled:opacity-50"
+              className="w-full mt-4 bg-nova-navy text-white py-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-blue-900 transition-all shadow-lg shadow-blue-900/20 disabled:opacity-50"
             >
               {loading ? <Loader2 className="animate-spin" /> : "Get Started"}
               {!loading && <ArrowRight size={18} />}
@@ -107,7 +107,7 @@ export default function RegisterPage() {
             Already a member?{" "}
             <Link
               href="/login"
-              className="text-novaNavy font-black hover:text-novaGold transition-colors"
+              className="text-nova-navy font-black hover:text-nova-gold transition-colors"
             >
               Sign In
             </Link>
@@ -135,7 +135,7 @@ function AuthInput({ icon, label, placeholder, type, value, onChange }: any) {
           onChange={onChange}
           required
           placeholder={placeholder}
-          className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-novaNavy/10 text-novaNavy font-bold placeholder:text-gray-300 transition-all"
+          className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-nova-navy/10 text-nova-navy font-bold placeholder:text-gray-300 transition-all"
         />
       </div>
     </div>

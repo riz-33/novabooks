@@ -45,16 +45,16 @@ export default function LoginPage() {
       <div className="max-w-md w-full">
         {/* Logo / Brand */}
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-black text-novaNavy tracking-tighter">
+          <h1 className="text-4xl font-black text-nova-navy tracking-tighter">
             NOVABOOKS
           </h1>
-          <p className="text-novaGold font-bold text-xs uppercase tracking-[0.2em] mt-2">
+          <p className="text-nova-gold font-bold text-xs uppercase tracking-[0.2em] mt-2">
             Finance Management System
           </p>
         </div>
 
         <div className="bg-white p-10 rounded-[2.5rem] border border-gray-100 shadow-2xl shadow-blue-900/5">
-          <h2 className="text-2xl font-black text-novaNavy mb-2">
+          <h2 className="text-2xl font-black text-nova-navy mb-2">
             Welcome Back
           </h2>
           <p className="text-gray-400 text-sm mb-8 font-medium">
@@ -79,7 +79,7 @@ export default function LoginPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }
-                  className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-novaNavy/10 text-novaNavy font-bold placeholder:text-gray-300 transition-all"
+                  className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-nova-navy/10 text-nova-navy font-bold placeholder:text-gray-300 transition-all"
                 />
               </div>
             </div>
@@ -101,7 +101,7 @@ export default function LoginPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, password: e.target.value })
                   }
-                  className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-novaNavy/10 text-novaNavy font-bold placeholder:text-gray-300 transition-all"
+                  className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-nova-navy/10 text-nova-navy font-bold placeholder:text-gray-300 transition-all"
                 />
               </div>
             </div>
@@ -109,7 +109,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-novaNavy text-white py-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-blue-900 transition-all shadow-lg shadow-blue-900/20 active:scale-[0.98]"
+              className="w-full bg-nova-navy text-white py-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-blue-900 transition-all shadow-lg shadow-blue-900/20 active:scale-[0.98]"
             >
               {loading ? <Loader2 className="animate-spin" /> : "Sign In"}
               {!loading && <ArrowRight size={18} />}
@@ -121,7 +121,7 @@ export default function LoginPage() {
               Don't have an account?{" "}
               <Link
                 href="/register"
-                className="text-novaNavy font-black hover:text-novaGold transition-colors"
+                className="text-nova-navy font-black hover:text-nova-gold transition-colors"
               >
                 Create Account
               </Link>

@@ -21,7 +21,7 @@ export default function LedgerPage() {
   return (
     <div className="p-8 max-w-[1200px] mx-auto">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-        <h1 className="text-3xl font-black text-novaNavy">General Ledger</h1>
+        <h1 className="text-3xl font-black text-nova-navy">General Ledger</h1>
         <div className="flex gap-2">
           <div className="relative">
             <Search
@@ -31,10 +31,10 @@ export default function LedgerPage() {
             <input
               type="text"
               placeholder="Search transactions..."
-              className="pl-10 pr-4 py-2 bg-white border border-gray-100 rounded-xl outline-none focus:ring-2 focus:ring-novaGold/20"
+              className="pl-10 pr-4 py-2 bg-white border border-gray-100 rounded-xl outline-none focus:ring-2 focus:ring-nova-gold/20"
             />
           </div>
-          <button className="p-2 bg-white border border-gray-100 rounded-xl text-gray-500 hover:text-novaNavy">
+          <button className="p-2 bg-white border border-gray-100 rounded-xl text-gray-500 hover:text-nova-navy">
             <Filter size={20} />
           </button>
         </div>
@@ -67,7 +67,7 @@ export default function LedgerPage() {
                 <td className="p-4 text-sm font-medium text-gray-500">
                   {t.date}
                 </td>
-                <td className="p-4 text-sm font-bold text-novaNavy">
+                <td className="p-4 text-sm font-bold text-nova-navy">
                   {t.desc}
                 </td>
                 <td className="p-4">

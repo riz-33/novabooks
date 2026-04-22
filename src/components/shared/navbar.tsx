@@ -42,7 +42,7 @@ export default function Navbar() {
                 width={100}
                 height={60}
               />
-              <span className="text-xl font-black text-novaNavy tracking-tighter hidden sm:block">
+              <span className="text-xl font-black text-nova-navy tracking-tighter hidden sm:block">
                 NOVABOOKS
               </span>
             </Link>
@@ -71,17 +71,17 @@ export default function Navbar() {
           <div className="hidden md:flex items-center space-x-4">
             {/* {user ? ( */}
             <>
-              <button className="cursor-pointer text-gray-400 hover:text-novaGold transition-colors">
+              <button className="cursor-pointer text-gray-400 hover:text-nova-gold transition-colors">
                 <Bell size={20} />
               </button>
-              <button className="cursor-pointer p-2 text-gray-400 hover:text-novaGold transition-colors">
+              <button className="cursor-pointer p-2 text-gray-400 hover:text-nova-gold transition-colors">
                 <User size={20} />
               </button>
 
               <div className="h-8 w-[1px] bg-gray-200"></div>
               <button
                 onClick={handleLogout}
-                className="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm font-bold text-white bg-novaNavy rounded-xl hover:bg-blue-900 transition-all shadow-md active:scale-95"
+                className="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm font-bold text-white bg-nova-navy rounded-xl hover:bg-blue-900 transition-all shadow-md active:scale-95"
               >
                 <LogOut size={16} />
                 Logout
@@ -91,13 +91,13 @@ export default function Navbar() {
             <div className="flex items-center gap-4">
               <Link
                 href="/"
-                className="text-sm font-bold text-novaNavy hover:text-novaGold transition-colors"
+                className="text-sm font-bold text-nova-navy hover:text-nova-gold transition-colors"
               >
                 Sign In
               </Link>
               <Link
                 href="/register"
-                className="px-5 py-2.5 text-sm font-bold text-white bg-novaNavy rounded-xl shadow-lg hover:shadow-novaNavy/20 transition-all active:scale-95"
+                className="px-5 py-2.5 text-sm font-bold text-white bg-nova-navy rounded-xl shadow-lg hover:shadow-nova-navy/20 transition-all active:scale-95"
               >
                 Get Started
               </Link>
@@ -109,7 +109,7 @@ export default function Navbar() {
           <div className="flex items-center md:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="text-novaNavy p-2 rounded-lg hover:bg-gray-50"
+              className="text-nova-navy p-2 rounded-lg hover:bg-gray-50"
             >
               {isOpen ? <X size={28} /> : <Menu size={28} />}
             </button>
@@ -143,13 +143,13 @@ export default function Navbar() {
           <div className="flex flex-col gap-2">
             <Link
               href="/login"
-              className="w-full text-center py-3 font-bold text-novaNavy"
+              className="w-full text-center py-3 font-bold text-nova-navy"
             >
               Login
             </Link>
             <Link
               href="/register"
-              className="w-full text-center py-3 font-bold bg-novaNavy text-white rounded-xl"
+              className="w-full text-center py-3 font-bold bg-nova-navy text-white rounded-xl"
             >
               Register
             </Link>
@@ -166,9 +166,9 @@ function NavLink({ href, icon, label }) {
   return (
     <Link
       href={href}
-      className="flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-novaNavy transition-colors group"
+      className="flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-nova-navy transition-colors group"
     >
-      <span className="text-gray-400 group-hover:text-novaGold transition-colors">
+      <span className="text-gray-400 group-hover:text-nova-gold transition-colors">
         {icon}
       </span>
       {label}
@@ -181,7 +181,7 @@ function MobileNavLink({ href, label, onClick }) {
     <Link
       href={href}
       onClick={onClick}
-      className="block px-4 py-3 text-base font-bold text-novaNavy hover:bg-gray-50 rounded-xl"
+      className="block px-4 py-3 text-base font-bold text-nova-navy hover:bg-gray-50 rounded-xl"
     >
       {label}
     </Link>

@@ -6,8 +6,8 @@ export default function SettingsPage() {
   return (
     <div className="p-8 max-w-4xl mx-auto">
       <div className="mb-10">
-        <h1 className="text-3xl font-black text-novaNavy">Settings</h1>
-        <p className="text-novaGold font-medium">
+        <h1 className="text-3xl font-black text-nova-navy">Settings</h1>
+        <p className="text-nova-gold font-medium">
           Configure NovaBooks to fit your workflow.
         </p>
       </div>
@@ -46,11 +46,11 @@ export default function SettingsPage() {
         <SettingSection title="Security">
           <button className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors rounded-2xl">
             <div className="flex items-center gap-4">
-              <div className="p-2 bg-slate-100 rounded-xl text-novaNavy">
+              <div className="p-2 bg-slate-100 rounded-xl text-nova-navy">
                 <Lock size={20} />
               </div>
               <div className="text-left">
-                <p className="text-sm font-bold text-novaNavy">
+                <p className="text-sm font-bold text-nova-navy">
                   Change Password
                 </p>
                 <p className="text-xs text-gray-400">
@@ -58,7 +58,7 @@ export default function SettingsPage() {
                 </p>
               </div>
             </div>
-            <span className="text-xs font-black text-novaGold">UPDATE</span>
+            <span className="text-xs font-black text-nova-gold">UPDATE</span>
           </button>
         </SettingSection>
       </div>
@@ -91,12 +91,12 @@ function ToggleItem({ icon, label, description, enabled }: any) {
       <div className="flex items-center gap-4">
         <div className="text-gray-400">{icon}</div>
         <div>
-          <p className="text-sm font-bold text-novaNavy">{label}</p>
+          <p className="text-sm font-bold text-nova-navy">{label}</p>
           <p className="text-xs text-gray-400">{description}</p>
         </div>
       </div>
       <div
-        className={`w-10 h-5 rounded-full relative transition-colors cursor-pointer ${enabled ? "bg-novaNavy" : "bg-gray-200"}`}
+        className={`w-10 h-5 rounded-full relative transition-colors cursor-pointer ${enabled ? "bg-nova-navy" : "bg-gray-200"}`}
       >
         <div
           className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${enabled ? "left-6" : "left-1"}`}
