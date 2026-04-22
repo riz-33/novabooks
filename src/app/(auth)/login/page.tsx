@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
+import Image from "next/image";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -28,7 +29,7 @@ export default function LoginPage() {
         // Save data for the dashboard to use
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
-        Cookies.set("token", data.token, { expires: 1 }); 
+        Cookies.set("token", data.token, { expires: 1 });
         router.push("/dashboard");
       } else {
         alert(data.error);
@@ -44,7 +45,14 @@ export default function LoginPage() {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
         {/* Logo / Brand */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-4">
+          <Image
+            className="h-30 w-45 mx-auto mb-4"
+            src={"/logo2.png"}
+            alt="NovaBooks"
+            width={100}
+            height={60}
+          />
           <h1 className="text-4xl font-black text-nova-navy tracking-tighter">
             NOVABOOKS
           </h1>
