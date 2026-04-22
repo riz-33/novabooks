@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
 import Image from "next/image";
+import { showToast } from "nextjs-toast-notify";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -26,16 +27,32 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (res.ok) {
-        // Save data for the dashboard to use
+        showToast.success("Logged in successfully!", {
+          duration: 4000,
+          // position: "top-right",
+          transition: "bounceIn",
+          progress: true,
+        });
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
         Cookies.set("token", data.token, { expires: 1 });
         router.push("/dashboard");
       } else {
-        alert(data.error);
+        showToast.error(data.error || "Something went wrong", {
+          duration: 4000,
+          // position: "top-right",
+          transition: "bounceIn",
+          progress: true,
+        });
       }
     } catch (err) {
-      console.error("Login Error:", err);
+      showToast.error("An error occurred. Please try again.", {
+        duration: 4000,
+        // position: "top-right",
+        transition: "bounceIn",
+        progress: true,
+      });
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -47,11 +64,12 @@ export default function LoginPage() {
         {/* Logo / Brand */}
         <div className="text-center mb-4">
           <Image
-            className="h-30 w-45 mx-auto mb-4"
-            src={"/logo2.png"}
+            className="mx-auto mb-4 object-contain"
+            src="/logo2.png"
             alt="NovaBooks"
-            width={100}
-            height={60}
+            width={150} // Slightly larger for better visibility
+            height={80}
+            priority// Adds a performance boost for the logo
           />
           <h1 className="text-4xl font-black text-nova-navy tracking-tighter">
             NOVABOOKS
@@ -70,54 +88,31 @@ export default function LoginPage() {
           </p>
 
           <form onSubmit={handleLogin} className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
-                Email Address
-              </label>
-              <div className="relative">
-                <Mail
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300"
-                  size={18}
-                />
-                <input
-                  required
-                  type="email"
-                  value={formData.email}
-                  placeholder="name@company.com"
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-nova-navy/10 text-nova-navy font-bold placeholder:text-gray-300 transition-all"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
-                Password
-              </label>
-              <div className="relative">
-                <Lock
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300"
-                  size={18}
-                />
-                <input
-                  required
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={(e) =>
-                    setFormData({ ...formData, password: e.target.value })
-                  }
-                  className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-nova-navy/10 text-nova-navy font-bold placeholder:text-gray-300 transition-all"
-                />
-              </div>
-            </div>
+            <AuthInput
+              icon={<Mail size={18} />}
+              label="Email Address"
+              placeholder="name@company.com"
+              type="email"
+              value={formData.email}
+              onChange={(e: any) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
+            />
+            <AuthInput
+              icon={<Lock size={18} />}
+              label="Password"
+              placeholder="••••••••"
+              type="password"
+              value={formData.password}
+              onChange={(e: any) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
+            />
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-nova-navy text-white py-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-blue-900 transition-all shadow-lg shadow-blue-900/20 active:scale-[0.98]"
+              className="w-full bg-nova-navy text-white py-2 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-blue-900 transition-all shadow-lg shadow-blue-900/20 active:scale-[0.98]"
             >
               {loading ? <Loader2 className="animate-spin" /> : "Sign In"}
               {!loading && <ArrowRight size={18} />}
@@ -136,6 +131,29 @@ export default function LoginPage() {
             </p>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function AuthInput({ icon, label, placeholder, type, value, onChange }: any) {
+  return (
+    <div className="space-y-2">
+      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">
+        {label}
+      </label>
+      <div className="relative">
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300">
+          {icon}
+        </div>
+        <input
+          type={type}
+          value={value}
+          onChange={onChange}
+          required
+          placeholder={placeholder}
+          className="w-full pl-12 pr-4 py-2 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-nova-navy/10 text-nova-navy font-bold placeholder:text-gray-300 transition-all"
+        />
       </div>
     </div>
   );

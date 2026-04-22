@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation"; // Added useRouter
 import { User, Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
 import Image from "next/image";
+import { showToast } from "nextjs-toast-notify";
+import Cookies from "js-cookie";
 
 export default function RegisterPage() {
   const router = useRouter(); // Initialize router
@@ -30,13 +32,32 @@ export default function RegisterPage() {
 
       const data = await res.json();
       if (res.ok) {
-        alert("Success! Now please login.");
-        router.push("/login");
+        showToast.success("Account created successfully!", {
+          duration: 4000,
+          // position: "top-right",
+          transition: "bounceIn",
+          progress: true,
+        });
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+        Cookies.set("token", data.token, { expires: 1 });
+        router.push("/dashboard");
       } else {
-        alert(data.error || "Something went wrong");
+        showToast.error(data.error || "Something went wrong", {
+          duration: 4000,
+          // position: "top-right",
+          transition: "bounceIn",
+          progress: true,
+        });
       }
     } catch (err) {
       console.error(err);
+      showToast.error("An error occurred. Please try again.", {
+        duration: 4000,
+        // position: "top-right",
+        transition: "bounceIn",
+        progress: true,
+      });
     } finally {
       setLoading(false);
     }
@@ -47,11 +68,12 @@ export default function RegisterPage() {
       <div className="max-w-md w-full">
         <div className="text-center mb-5">
           <Image
-            className="h-30 w-45 mx-auto mb-4"
-            src={"/logo2.png"}
+            className="mx-auto mb-4 object-contain"
+            src="/logo2.png"
             alt="NovaBooks"
-            width={100}
-            height={60}
+            width={150} // Slightly larger for better visibility
+            height={80}
+            priority // Adds a performance boost for the logo
           />
           <h1 className="text-4xl font-black text-nova-navy tracking-tighter">
             NOVABOOKS
@@ -104,7 +126,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-4 bg-nova-navy text-white py-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-blue-900 transition-all shadow-lg shadow-blue-900/20 disabled:opacity-50"
+              className="w-full mt-4 bg-nova-navy text-white py-2 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-blue-900 transition-all shadow-lg shadow-blue-900/20 disabled:opacity-50"
             >
               {loading ? <Loader2 className="animate-spin" /> : "Get Started"}
               {!loading && <ArrowRight size={18} />}
@@ -143,7 +165,7 @@ function AuthInput({ icon, label, placeholder, type, value, onChange }: any) {
           onChange={onChange}
           required
           placeholder={placeholder}
-          className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-nova-navy/10 text-nova-navy font-bold placeholder:text-gray-300 transition-all"
+          className="w-full pl-12 pr-4 py-2 bg-slate-50 border-none rounded-2xl outline-none focus:ring-2 focus:ring-nova-navy/10 text-nova-navy font-bold placeholder:text-gray-300 transition-all"
         />
       </div>
     </div>
