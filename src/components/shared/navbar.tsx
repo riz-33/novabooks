@@ -1,30 +1,47 @@
 "use client";
-import "../../app/globals.css";
+
 import React, { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { authContext } from "@/context/authContext";
-import Logo from "@/assets/logo.png";
+import { usePathname } from "next/navigation";
 import {
+  LayoutDashboard,
+  Wallet,
+  BookOpen,
+  FileText,
+  PieChart,
+  Settings,
+  LogOut,
   Menu,
   X,
-  LayoutDashboard,
-  BookOpen,
   User,
-  LogOut,
   Bell,
 } from "lucide-react"; // Lightweight icons
 
+import "../../app/globals.css";
+import Image from "next/image";
+import { authContext } from "@/context/authContext";
+import Logo from "@/assets/logo.png";
+import { useRouter } from "next/navigation";
+
+const navItems = [
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Accounts", href: "/accounts", icon: Wallet },
+  { name: "Ledger", href: "/ledger", icon: BookOpen },
+  { name: "P&L", href: "/pnl", icon: PieChart },
+  { name: "Balance Sheet", href: "/balance-sheet", icon: FileText },
+  { name: "Settings", href: "/settings", icon: Settings },
+];
+
 export default function Navbar() {
+  const pathname = usePathname();
   //   const { user, logout } = React.useContext(authContext);
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleLogout = () => {
-    // logout();
-    router.push("/");
-  };
+  // const handleLogout = () => {
+  //   logout();
+  //   router.push("/");
+  // };
 
   return (
     <nav className="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
@@ -80,7 +97,7 @@ export default function Navbar() {
 
               <div className="h-8 w-[1px] bg-gray-200"></div>
               <button
-                onClick={handleLogout}
+                // onClick={handleLogout}
                 className="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm font-bold text-white bg-nova-navy rounded-xl hover:bg-blue-900 transition-all shadow-md active:scale-95"
               >
                 <LogOut size={16} />
@@ -133,7 +150,7 @@ export default function Navbar() {
               onClick={() => setIsOpen(false)}
             />
             <button
-              onClick={handleLogout}
+              // onClick={handleLogout}
               className="w-full text-left px-4 py-3 text-red-600 font-bold bg-red-50 rounded-xl"
             >
               Logout
