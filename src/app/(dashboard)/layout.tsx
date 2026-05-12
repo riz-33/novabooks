@@ -45,6 +45,7 @@ export default function DashboardLayout({ children }) {
   const [darkMode, setDarkMode] = useState(false);
   const [userMenu, setUserMenu] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   const [role] = useState("admin"); // later from backend
   const navItems = navConfig[role];
@@ -59,6 +60,25 @@ export default function DashboardLayout({ children }) {
 
     document.documentElement.classList.toggle("dark", isDark);
   }, []);
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = () => setDarkMode(media.matches);
+    media.addEventListener("change", handleChange);
+    return () => media.removeEventListener("change", handleChange);
+  }, []);
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [darkMode]);
+
+  useEffect(() => {
+    setMobileSidebarOpen(false); // close mobile sidebar on desktop toggle
+  }, [pathname]);
 
   useEffect(() => {
     localStorage.setItem("theme", darkMode ? "dark" : "light");
@@ -122,46 +142,134 @@ export default function DashboardLayout({ children }) {
   return (
     <div className="flex h-screen bg-slate-50 dark:bg-slate-900">
       {/* 🔷 SIDEBAR */}
-      <motion.aside
-        animate={{ width: sidebarOpen ? 220 : 60 }}
-        transition={{ duration: 0.25 }}
-        className="bg-white dark:bg-slate-800 border-r flex flex-col"
-      >
-        {/* Toggle */}
-        <div className="flex items-center justify-left h-16 border-b px-4">
-          <button
-            aria-label="Toggle sidebar"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-          >
-            <Menu className=" cursor-pointer " />
-          </button>
-        </div>
+      <>
+        {/* 🔷 MOBILE OVERLAY */}
+        <AnimatePresence>
+          {mobileSidebarOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileSidebarOpen(false)}
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 md:hidden"
+            />
+          )}
+        </AnimatePresence>
 
-        <div className="flex flex-col gap-2 p-2 mt-4">
-          {navItems.map((item) => (
+        {/* 🔷 DESKTOP SIDEBAR */}
+        <motion.aside
+          animate={{ width: sidebarOpen ? 220 : 60 }}
+          transition={{ duration: 0.25 }}
+          className="hidden md:flex bg-white dark:bg-slate-800 border-r flex-col"
+        >
+          {/* Toggle */}
+          <div className="flex items-center justify-start h-16 border-b px-4">
+            <button
+              aria-label="Toggle sidebar"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="cursor-pointer"
+            >
+              <Menu />
+            </button>
+          </div>
+
+          <div className="flex flex-col gap-2 p-2 mt-4">
+            {navItems.map((item) => (
+              <SidebarLink
+                key={item.name}
+                item={item}
+                active={isActive(item.href)}
+                expanded={sidebarOpen}
+              />
+            ))}
+
+            <div className="border-t my-2" />
+
             <SidebarLink
-              key={item.name}
-              item={item}
-              active={isActive(item.href)}
+              item={{
+                name: "Settings",
+                href: "/settings",
+                icon: Settings,
+              }}
+              active={isActive("/settings")}
               expanded={sidebarOpen}
             />
-          ))}
+          </div>
+        </motion.aside>
 
-          <div className="border-t my-2" />
+        {/* 🔷 MOBILE SIDEBAR */}
+        <AnimatePresence>
+          {mobileSidebarOpen && (
+            <motion.aside
+              initial={{ x: -260 }}
+              animate={{ x: 0 }}
+              exit={{ x: -260 }}
+              transition={{ duration: 0.25 }}
+              className="fixed top-0 left-0 z-50 w-64 h-screen bg-white dark:bg-slate-800 border-r md:hidden"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between h-16 px-4 border-b">
+                <h2 className="font-bold dark:text-white">NOVABOOKS</h2>
 
-          <SidebarLink
-            item={{ name: "Settings", href: "/settings", icon: Settings }}
-            active={isActive("/settings")}
-            expanded={sidebarOpen}
-          />
-        </div>
-      </motion.aside>
+                <button
+                  onClick={() => setMobileSidebarOpen(false)}
+                  className="cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Nav */}
+              <div className="flex flex-col gap-2 p-3 mt-2">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`flex items-center gap-3 p-3 rounded-xl transition
+              ${
+                isActive(item.href)
+                  ? "bg-nova-navy text-white"
+                  : "text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700"
+              }`}
+                  >
+                    <item.icon size={20} />
+                    <span>{item.name}</span>
+                  </Link>
+                ))}
+
+                <div className="border-t my-2" />
+
+                <Link
+                  href="/settings"
+                  className={`flex items-center gap-3 p-3 rounded-xl transition
+            ${
+              isActive("/settings")
+                ? "bg-nova-navy text-white"
+                : "text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700"
+            }`}
+                >
+                  <Settings size={20} />
+                  <span>Settings</span>
+                </Link>
+              </div>
+            </motion.aside>
+          )}
+        </AnimatePresence>
+      </>
 
       {/* 🔷 MAIN */}
       <div className="flex-1 flex flex-col">
         {/* 🔹 TOPBAR */}
         <div className="flex items-center justify-between px-6 h-16 bg-white dark:bg-slate-800 border-b">
           <div className="flex items-center gap-4">
+            {/* 📱 Mobile Menu */}
+            <button
+              onClick={() => setMobileSidebarOpen(true)}
+              className="md:hidden cursor-pointer"
+            >
+              <Menu />
+            </button>
+
             <Image
               src="/logo7.png"
               alt="NovaBooks Logo"
@@ -169,6 +277,8 @@ export default function DashboardLayout({ children }) {
               height={32}
               className="cursor-pointer"
             />
+
+            {/* <div className="flex items-center gap-4"> */}
 
             {/* <h1 className="font-bold text-lg dark:text-white">{currentPage}</h1> */}
           </div>
@@ -187,10 +297,11 @@ export default function DashboardLayout({ children }) {
             <div className="relative" ref={notifRef}>
               <button
                 onClick={toggleNotifications}
-                className="relative"
+                className="relative cursor-pointer"
                 aria-label="Notifications"
               >
                 <Bell />
+
                 {notifications.length > 0 && (
                   <span className="absolute -top-1 -right-1 text-xs bg-red-500 text-white px-1 rounded-full">
                     {notifications.length > 9 ? "9+" : notifications.length}
@@ -204,12 +315,20 @@ export default function DashboardLayout({ children }) {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="absolute right-0 mt-2 w-72 bg-white dark:bg-slate-800 shadow-xl backdrop-blur-md rounded-xl p-4"
+                    className="absolute right-0 top-12 w-72 bg-white dark:bg-slate-800 shadow-xl backdrop-blur-md rounded-xl p-4 z-50 border dark:border-slate-700"
                   >
-                    <p className="font-bold mb-2">Notifications</p>
+                    <p className="font-bold mb-3 dark:text-white">
+                      Notifications
+                    </p>
+
                     <ul className="text-sm space-y-2">
                       {notifications.map((n, i) => (
-                        <li key={i}>{n}</li>
+                        <li
+                          key={i}
+                          className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition"
+                        >
+                          {n}
+                        </li>
                       ))}
                     </ul>
                   </motion.div>
@@ -218,10 +337,11 @@ export default function DashboardLayout({ children }) {
             </div>
 
             {/* 👤 USER MENU */}
+
             <div className="relative" ref={userRef}>
               <button
                 onClick={toggleUserMenu}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 cursor-pointer"
               >
                 <User />
                 <ChevronDown size={16} />
@@ -233,21 +353,23 @@ export default function DashboardLayout({ children }) {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 shadow-xl backdrop-blur-md rounded-xl p-2"
+                    className="absolute right-0 top-12 w-52 bg-white dark:bg-slate-800 shadow-xl backdrop-blur-md rounded-xl p-2 z-50 border dark:border-slate-700"
                   >
                     <Link
                       href="/profile"
-                      className="block p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded"
+                      className="block p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition"
                     >
                       Profile
                     </Link>
+
                     <Link
                       href="/settings"
-                      className="block p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded"
+                      className="block p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition"
                     >
                       Settings
                     </Link>
-                    <button className="w-full text-left p-2 hover:bg-red-50 text-red-500 rounded">
+
+                    <button className="w-full text-left p-2 rounded-lg hover:bg-red-50 text-red-500 transition">
                       Logout
                     </button>
                   </motion.div>
