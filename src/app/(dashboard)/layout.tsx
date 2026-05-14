@@ -47,43 +47,14 @@ export default function DashboardLayout({ children }) {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-  const [role] = useState("admin"); // later from backend
+  const role = "admin";
   const navItems = navConfig[role];
 
   const isActive = (path) => pathname === path;
 
-  /* 🌙 Dark Mode (persist + html class) */
-  useEffect(() => {
-    const stored = localStorage.getItem("theme");
-    const isDark = stored === "dark";
-    setDarkMode(isDark);
-
-    document.documentElement.classList.toggle("dark", isDark);
-  }, []);
-
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleChange = () => setDarkMode(media.matches);
-    media.addEventListener("change", handleChange);
-    return () => media.removeEventListener("change", handleChange);
-  }, []);
-
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [darkMode]);
-
   useEffect(() => {
     setMobileSidebarOpen(false); // close mobile sidebar on desktop toggle
   }, [pathname]);
-
-  useEffect(() => {
-    localStorage.setItem("theme", darkMode ? "dark" : "light");
-    document.documentElement.classList.toggle("dark", darkMode);
-  }, [darkMode]);
 
   /* 📌 Sidebar persistence */
   useEffect(() => {
@@ -111,6 +82,32 @@ export default function DashboardLayout({ children }) {
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
+
+  useEffect(() => {
+    const storedTheme = localStorage.getItem("theme");
+
+    if (storedTheme === "dark") {
+      setDarkMode(true);
+      document.documentElement.classList.add("dark");
+    } else {
+      setDarkMode(false);
+      document.documentElement.classList.remove("dark");
+    }
+  }, []);
+
+  const toggleDarkMode = () => {
+    const newTheme = !darkMode;
+
+    setDarkMode(newTheme);
+
+    if (newTheme) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  };
 
   /* 🔁 Toggle helpers */
   const toggleUserMenu = () => {
@@ -140,7 +137,7 @@ export default function DashboardLayout({ children }) {
     allRoutes.find((item) => item.href === pathname)?.name || "Dashboard";
 
   return (
-    <div className="flex h-screen bg-slate-50 dark:bg-slate-900">
+    <div className="flex h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100">
       {/* 🔷 SIDEBAR */}
       <>
         {/* 🔷 MOBILE OVERLAY */}
@@ -160,14 +157,14 @@ export default function DashboardLayout({ children }) {
         <motion.aside
           animate={{ width: sidebarOpen ? 220 : 60 }}
           transition={{ duration: 0.25 }}
-          className="hidden md:flex bg-white dark:bg-slate-800 border-r flex-col"
+          className="hidden md:flex bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex-col"
         >
           {/* Toggle */}
           <div className="flex items-center justify-start h-16 border-b px-4">
             <button
               aria-label="Toggle sidebar"
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="cursor-pointer"
+              className="cursor-pointer text-slate-600 dark:text-slate-300"
             >
               <Menu />
             </button>
@@ -205,7 +202,7 @@ export default function DashboardLayout({ children }) {
               animate={{ x: 0 }}
               exit={{ x: -260 }}
               transition={{ duration: 0.25 }}
-              className="fixed top-0 left-0 z-50 w-64 h-screen bg-white dark:bg-slate-800 border-r md:hidden"
+              className="fixed top-0 left-0 z-50 w-64 h-screen bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 md:hidden"
             >
               {/* Header */}
               <div className="flex items-center justify-between h-16 px-4 border-b">
@@ -229,7 +226,7 @@ export default function DashboardLayout({ children }) {
               ${
                 isActive(item.href)
                   ? "bg-nova-navy text-white"
-                  : "text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700"
+                  : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700"
               }`}
                   >
                     <item.icon size={20} />
@@ -245,7 +242,7 @@ export default function DashboardLayout({ children }) {
             ${
               isActive("/settings")
                 ? "bg-nova-navy text-white"
-                : "text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700"
+                : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700"
             }`}
                 >
                   <Settings size={20} />
@@ -260,12 +257,12 @@ export default function DashboardLayout({ children }) {
       {/* 🔷 MAIN */}
       <div className="flex-1 flex flex-col">
         {/* 🔹 TOPBAR */}
-        <div className="flex items-center justify-between px-6 h-16 bg-white dark:bg-slate-800 border-b">
+        <div className="flex items-center justify-between px-6 h-16 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border-b border-slate-900 dark:border-slate-100">
           <div className="flex items-center gap-4">
             {/* 📱 Mobile Menu */}
             <button
               onClick={() => setMobileSidebarOpen(true)}
-              className="md:hidden cursor-pointer"
+              className="md:hidden cursor-pointer text-slate-700 dark:text-slate-300"
             >
               <Menu />
             </button>
@@ -275,7 +272,7 @@ export default function DashboardLayout({ children }) {
               alt="NovaBooks Logo"
               width={150}
               height={32}
-              className="cursor-pointer"
+              className="cursor-pointer dark:brightness-50 dark:invert"
             />
 
             {/* <div className="flex items-center gap-4"> */}
@@ -287,8 +284,8 @@ export default function DashboardLayout({ children }) {
             {/* 🌙 Dark Mode */}
             <button
               aria-label="Toggle dark mode"
-              onClick={() => setDarkMode(!darkMode)}
-              className="cursor-pointer"
+              onClick={toggleDarkMode}
+              className="cursor-pointer text-slate-600 dark:text-slate-300 hover:text-black dark:hover:text-white transition"
             >
               {darkMode ? <Sun /> : <Moon />}
             </button>
@@ -297,7 +294,7 @@ export default function DashboardLayout({ children }) {
             <div className="relative" ref={notifRef}>
               <button
                 onClick={toggleNotifications}
-                className="relative cursor-pointer"
+                className="relative cursor-pointer text-slate-600 dark:text-slate-300 hover:text-black dark:hover:text-white transition"
                 aria-label="Notifications"
               >
                 <Bell />
@@ -315,7 +312,7 @@ export default function DashboardLayout({ children }) {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="absolute right-0 top-12 w-72 bg-white dark:bg-slate-800 shadow-xl backdrop-blur-md rounded-xl p-4 z-50 border dark:border-slate-700"
+                    className="absolute right-0 top-12 w-72 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 shadow-xl backdrop-blur-md rounded-xl p-4 z-50 border border-slate-200 dark:border-slate-700"
                   >
                     <p className="font-bold mb-3 dark:text-white">
                       Notifications
@@ -341,7 +338,7 @@ export default function DashboardLayout({ children }) {
             <div className="relative" ref={userRef}>
               <button
                 onClick={toggleUserMenu}
-                className="flex items-center gap-2 cursor-pointer"
+                className="flex items-center gap-2 cursor-pointer text-slate-600 dark:text-slate-300 hover:text-black dark:hover:text-white transition"
               >
                 <User />
                 <ChevronDown size={16} />
@@ -353,7 +350,7 @@ export default function DashboardLayout({ children }) {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="absolute right-0 top-12 w-52 bg-white dark:bg-slate-800 shadow-xl backdrop-blur-md rounded-xl p-2 z-50 border dark:border-slate-700"
+                    className="absolute right-0 top-12 w-52 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 shadow-xl backdrop-blur-md rounded-xl p-2 z-50 border border-slate-200 dark:border-slate-700"
                   >
                     <Link
                       href="/profile"
@@ -399,7 +396,7 @@ function SidebarLink({ item, active, expanded }) {
       ${
         active
           ? "bg-nova-navy text-white"
-          : "text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700"
+          : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700"
       }`}
     >
       <item.icon size={20} />

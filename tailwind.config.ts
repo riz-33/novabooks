@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 const config = {
+  darkMode: "class",
   content: [
     "./src/**/*.{js,ts,jsx,tsx,mdx}", // This covers everything inside src (app, components, lib, etc.)
     "./app/**/*.{js,ts,jsx,tsx,mdx}", // For projects not using /src

@@ -24,7 +24,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html
-      lang="en"
+      lang="en"  suppressHydrationWarning
       className={` ${outfit.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
     >
       <body className="bg-slate-50 text-slate-900 selection:bg-nova-gold/30">
