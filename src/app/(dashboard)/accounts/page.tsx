@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+// use native fetch to avoid axios dependency
 import {
   Wallet,
   Plus,
@@ -12,6 +13,7 @@ import {
   TrendingUp,
   TrendingDown,
 } from "lucide-react";
+
 import { motion, AnimatePresence } from "framer-motion";
 
 /* 🔹 ACCOUNT TYPES */
@@ -48,37 +50,39 @@ const ACCOUNT_TYPES = [
   },
 ];
 
-/* 🔹 MOCK DATA */
-const initialAccounts = [
-  {
-    id: 1,
-    name: "Main Business Account",
-    balance: 12500,
-    bank: "HBL",
-    type: "Asset",
-  },
-  {
-    id: 2,
-    name: "Savings",
-    balance: 5400,
-    bank: "Meezan",
-    type: "Asset",
-  },
-];
-
 export default function AccountsPage() {
-  const [accounts, setAccounts] = useState(initialAccounts);
+  const [accounts, setAccounts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const [openModal, setOpenModal] = useState(false);
 
-  const handleAddAccount = (newAccount) => {
-    setAccounts((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        ...newAccount,
-      },
-    ]);
+  /* 🔹 FETCH ACCOUNTS */
+  const fetchAccounts = async () => {
+    try {
+      setLoading(true);
+
+      const token = localStorage.getItem("token");
+
+      const res = await fetch("/api/accounts", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      setAccounts(data.accounts || []);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    fetchAccounts();
+  }, []);
 
   return (
     <div className="p-4 md:p-8 max-w-[1400px] mx-auto">
@@ -103,95 +107,129 @@ export default function AccountsPage() {
         </button>
       </div>
 
-      {/* 🔹 CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {accounts.map((acc) => (
-          <motion.div
-            key={acc.id}
-            whileHover={{ y: -4 }}
-            className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-6 rounded-3xl shadow-sm hover:shadow-xl transition-all"
+      {/* 🔹 LOADING */}
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="h-52 rounded-3xl bg-slate-200 dark:bg-slate-800 animate-pulse"
+            />
+          ))}
+        </div>
+      ) : accounts.length === 0 ? (
+        /* 🔹 EMPTY STATE */
+        <div className="bg-white dark:bg-slate-800 rounded-3xl p-10 border border-slate-200 dark:border-slate-700 text-center">
+          <Wallet
+            size={60}
+            className="mx-auto text-slate-300 dark:text-slate-600 mb-4"
+          />
+
+          <h3 className="text-2xl font-bold text-slate-900 dark:text-white">
+            No Accounts Found
+          </h3>
+
+          <p className="text-slate-500 mt-2">
+            Create your first account to start tracking finances.
+          </p>
+
+          <button
+            onClick={() => setOpenModal(true)}
+            className="mt-6 bg-nova-navy text-white px-6 py-3 rounded-2xl font-bold"
           >
-            {/* TOP */}
-            <div className="flex items-start justify-between mb-5">
-              <div className="p-3 rounded-2xl bg-blue-50 dark:bg-slate-700 text-nova-navy dark:text-white">
-                <Wallet size={24} />
+            Add Account
+          </button>
+        </div>
+      ) : (
+        /* 🔹 ACCOUNT CARDS */
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {accounts.map((acc) => (
+            <motion.div
+              key={acc._id}
+              whileHover={{ y: -5 }}
+              className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-6 rounded-3xl shadow-sm hover:shadow-xl transition-all"
+            >
+              {/* TOP */}
+              <div className="flex items-start justify-between mb-5">
+                <div className="p-3 rounded-2xl bg-blue-50 dark:bg-slate-700 text-nova-navy dark:text-white">
+                  <Wallet size={24} />
+                </div>
+
+                <button className="text-slate-400 hover:text-slate-700 dark:hover:text-white transition">
+                  <MoreVertical size={20} />
+                </button>
               </div>
 
-              <button className="text-slate-400 hover:text-slate-700 dark:hover:text-white transition">
-                <MoreVertical size={20} />
-              </button>
-            </div>
-
-            {/* INFO */}
-            <div>
-              <p className="text-xs uppercase tracking-widest font-bold text-slate-400 mb-2">
-                {acc.bank}
-              </p>
-
-              <h3 className="text-xl font-black text-slate-900 dark:text-white">
-                {acc.name}
-              </h3>
-
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                {acc.type}
-              </p>
-
-              <div className="mt-5">
-                <p className="text-3xl font-black text-slate-900 dark:text-white">
-                  ${acc.balance.toLocaleString()}
+              {/* INFO */}
+              <div>
+                <p className="text-xs uppercase tracking-widest font-bold text-slate-400 mb-2">
+                  {acc.type}
                 </p>
+
+                <h3 className="text-xl font-black text-slate-900 dark:text-white">
+                  {acc.name}
+                </h3>
+
+                <div className="mt-5">
+                  <p className="text-3xl font-black text-slate-900 dark:text-white">
+                    PKR {Number(acc.balance).toLocaleString()}
+                  </p>
+                </div>
               </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       {/* 🔹 MODAL */}
       <CreateAccountModal
         isOpen={openModal}
         onClose={() => setOpenModal(false)}
-        onAccountCreated={handleAddAccount}
+        refreshAccounts={fetchAccounts}
       />
     </div>
   );
 }
 
 /* 🔹 CREATE ACCOUNT MODAL */
-function CreateAccountModal({ isOpen, onClose, onAccountCreated }) {
+function CreateAccountModal({ isOpen, onClose, refreshAccounts }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
     type: "Asset",
     balance: "",
-    bank: "",
   });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    setIsSubmitting(true);
-
     try {
-      // 👉 Replace with API later
+      setIsSubmitting(true);
 
-      const payload = {
-        ...formData,
-        balance: Number(formData.balance),
-      };
+      const token = localStorage.getItem("token");
 
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      await fetch("/api/accounts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          ...formData,
+          balance: Number(formData.balance),
+        }),
+      });
 
-      onAccountCreated(payload);
+      refreshAccounts();
+
+      onClose();
 
       setFormData({
         name: "",
         type: "Asset",
         balance: "",
-        bank: "",
       });
-
-      onClose();
     } catch (error) {
       console.log(error);
     } finally {
@@ -244,22 +282,11 @@ function CreateAccountModal({ isOpen, onClose, onAccountCreated }) {
               {/* FORM */}
               <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-8">
                 {/* ACCOUNT NAME */}
-                {/* <div className="space-y-2"> */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
                   <label className="text-xs font-bold uppercase tracking-widest text-slate-400">
                     Account Name
                   </label>
 
-                  <label className="text-xs font-bold uppercase tracking-widest text-slate-400">
-                    Bank Name
-                  </label>
-
-                  <label className="text-xs font-bold uppercase tracking-widest text-slate-400">
-                    Opening Balance
-                  </label>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <input
                     required
                     placeholder="Main Business Account"
@@ -272,27 +299,13 @@ function CreateAccountModal({ isOpen, onClose, onAccountCreated }) {
                     }
                     className="w-full px-5 py-4 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-transparent focus:border-nova-navy dark:text-white outline-none"
                   />
-                  {/* </div> */}
+                </div>
 
-                  {/* BANK */}
-                  {/* <div className="space-y-2"> */}
-
-                  <input
-                    required
-                    placeholder="HBL / Meezan / UBL"
-                    value={formData.bank}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        bank: e.target.value,
-                      })
-                    }
-                    className="w-full px-5 py-4 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-transparent focus:border-nova-navy dark:text-white outline-none"
-                  />
-                  {/* </div> */}
-
-                  {/* BALANCE */}
-                  {/* <div className="space-y-2"> */}
+                {/* BALANCE */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-widest text-slate-400">
+                    Opening Balance
+                  </label>
 
                   <input
                     required
@@ -315,7 +328,7 @@ function CreateAccountModal({ isOpen, onClose, onAccountCreated }) {
                     Account Type
                   </label>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {ACCOUNT_TYPES.map((type) => (
                       <button
                         key={type.value}
@@ -326,7 +339,7 @@ function CreateAccountModal({ isOpen, onClose, onAccountCreated }) {
                             type: type.value,
                           })
                         }
-                        className={`flex items-start gap-4 p-2 rounded-2xl border-2 transition-all text-left
+                        className={`flex items-start gap-4 p-4 rounded-2xl border-2 transition-all text-left
                         ${
                           formData.type === type.value
                             ? "border-nova-navy bg-blue-50 dark:bg-slate-800"
@@ -363,7 +376,7 @@ function CreateAccountModal({ isOpen, onClose, onAccountCreated }) {
                   <button
                     type="button"
                     onClick={onClose}
-                    className="flex-1 py-2 rounded-2xl font-bold border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                    className="flex-1 py-4 rounded-2xl font-bold border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
                   >
                     Cancel
                   </button>
@@ -371,7 +384,7 @@ function CreateAccountModal({ isOpen, onClose, onAccountCreated }) {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex-[2] py-2 rounded-2xl bg-nova-navy text-white font-black shadow-xl hover:scale-[1.01] active:scale-[0.98] transition disabled:opacity-50"
+                    className="flex-[2] py-4 rounded-2xl bg-nova-navy text-white font-black shadow-xl hover:scale-[1.01] active:scale-[0.98] transition disabled:opacity-50"
                   >
                     {isSubmitting ? "Creating..." : "ADD ACCOUNT"}
                   </button>
