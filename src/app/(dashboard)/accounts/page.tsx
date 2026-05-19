@@ -60,10 +60,14 @@ export default function AccountsPage() {
   const fetchAccounts = async () => {
     try {
       setLoading(true);
-
       const token = localStorage.getItem("token");
+      const storedUser = localStorage.getItem("user");
+      const user = storedUser ? JSON.parse(storedUser) : null;
 
-      const res = await fetch("/api/accounts", {
+      if (!user?._id) return;
+
+      // Correctly append the dynamic userId query parameter to match your backend query parser
+      const res = await fetch(`/api/accounts?userId=${user._id}`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -71,10 +75,9 @@ export default function AccountsPage() {
       });
 
       const data = await res.json();
-
       setAccounts(data.accounts || []);
     } catch (error) {
-      console.log(error);
+      console.error("Failed fetching accounts:", error);
     } finally {
       setLoading(false);
     }
@@ -201,37 +204,43 @@ function CreateAccountModal({ isOpen, onClose, refreshAccounts }) {
     balance: "",
   });
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
       setIsSubmitting(true);
-
       const token = localStorage.getItem("token");
+      const storedUser = localStorage.getItem("user");
+      const user = storedUser ? JSON.parse(storedUser) : null;
 
-      await fetch("/api/accounts", {
+      if (!user?._id) {
+        alert("Session expired. Please log in again.");
+        return;
+      }
+
+      const res = await fetch("/api/accounts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          ...formData,
-          balance: Number(formData.balance),
+          userId: user._id, // Critical structural fix
+          name: formData.name,
+          type: formData.type,
+          balance: Number(formData.balance) || 0,
         }),
       });
 
-      refreshAccounts();
-
-      onClose();
-
-      setFormData({
-        name: "",
-        type: "Asset",
-        balance: "",
-      });
+      if (res.ok) {
+        refreshAccounts();
+        onClose();
+        setFormData({ name: "", type: "Asset", balance: "" });
+      } else {
+        const errorData = await res.json();
+        console.error("Account registration failure:", errorData.error);
+      }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     } finally {
       setIsSubmitting(false);
     }

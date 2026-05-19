@@ -1,6 +1,7 @@
 import Account from "@/models/Accounts";
 import connectDB from "@/lib/db";
 import { NextResponse } from "next/server";
+import jwt from "jsonwebtoken";
 
 
 export async function POST(req: Request) {
@@ -51,29 +52,33 @@ export async function POST(req: Request) {
   }
 }
 
+// src/app/api/accounts/route.ts
+
 export async function GET(req: Request) {
   try {
     await connectDB();
-
     const { searchParams } = new URL(req.url);
-
-    const userId = searchParams.get("userId");
-
+    
+    // Fallback strategy: check search parameters, or fallback to parsing the token authorization header
+    let userId = searchParams.get("userId");
+    
     if (!userId) {
-      return NextResponse.json(
-        { error: "User ID is required" },
-        { status: 400 },
-      );
+      const authHeader = req.headers.get("authorization");
+      if (authHeader && authHeader.startsWith("Bearer ")) {
+        const token = authHeader.split(" ")[1];
+        // If you have a jwt verification utility:
+        const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+        userId = decoded.id;
+      }
     }
 
-    const accounts = await Account.find({ userId })
-      .sort({ createdAt: -1 })
-      .lean();
+    if (!userId) {
+      return NextResponse.json({ error: "Authentication or User ID is required" }, { status: 400 });
+    }
 
+    const accounts = await Account.find({ userId }).sort({ createdAt: -1 }).lean();
     return NextResponse.json({ accounts }, { status: 200 });
   } catch (error: any) {
-    console.log(error);
-
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
