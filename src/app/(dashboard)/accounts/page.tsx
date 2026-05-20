@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-// use native fetch to avoid axios dependency
 import {
   Wallet,
   Plus,
@@ -16,7 +15,6 @@ import {
 
 import { motion, AnimatePresence } from "framer-motion";
 
-/* 🔹 ACCOUNT TYPES */
 const ACCOUNT_TYPES = [
   {
     label: "Asset",
@@ -53,10 +51,8 @@ const ACCOUNT_TYPES = [
 export default function AccountsPage() {
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [openModal, setOpenModal] = useState(false);
 
-  /* 🔹 FETCH ACCOUNTS */
   const fetchAccounts = async () => {
     try {
       setLoading(true);
@@ -64,15 +60,25 @@ export default function AccountsPage() {
       const storedUser = localStorage.getItem("user");
       const user = storedUser ? JSON.parse(storedUser) : null;
 
-      if (!user?._id) return;
+      const currentUserId = user?._id || user?.id;
 
-      // Correctly append the dynamic userId query parameter to match your backend query parser
-      const res = await fetch(`/api/accounts?userId=${user._id}`, {
+      if (!currentUserId) {
+        console.warn("No user context found in localStorage.");
+        setLoading(false);
+        return;
+      }
+
+      const res = await fetch(`/api/accounts?userId=${currentUserId}`, {
         method: "GET",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
+
+      if (!res.ok) {
+        throw new Error(`Server responded with status ${res.status}`);
+      }
 
       const data = await res.json();
       setAccounts(data.accounts || []);
@@ -89,7 +95,6 @@ export default function AccountsPage() {
 
   return (
     <div className="p-4 md:p-8 max-w-[1400px] mx-auto">
-      {/* 🔹 HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 mb-8">
         <div>
           <h1 className="text-3xl font-black text-slate-900 dark:text-white">
@@ -110,7 +115,6 @@ export default function AccountsPage() {
         </button>
       </div>
 
-      {/* 🔹 LOADING */}
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
@@ -121,7 +125,6 @@ export default function AccountsPage() {
           ))}
         </div>
       ) : accounts.length === 0 ? (
-        /* 🔹 EMPTY STATE */
         <div className="bg-white dark:bg-slate-800 rounded-3xl p-10 border border-slate-200 dark:border-slate-700 text-center">
           <Wallet
             size={60}
@@ -144,7 +147,6 @@ export default function AccountsPage() {
           </button>
         </div>
       ) : (
-        /* 🔹 ACCOUNT CARDS */
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {accounts.map((acc) => (
             <motion.div
@@ -152,7 +154,6 @@ export default function AccountsPage() {
               whileHover={{ y: -5 }}
               className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-6 rounded-3xl shadow-sm hover:shadow-xl transition-all"
             >
-              {/* TOP */}
               <div className="flex items-start justify-between mb-5">
                 <div className="p-3 rounded-2xl bg-blue-50 dark:bg-slate-700 text-nova-navy dark:text-white">
                   <Wallet size={24} />
@@ -163,7 +164,6 @@ export default function AccountsPage() {
                 </button>
               </div>
 
-              {/* INFO */}
               <div>
                 <p className="text-xs uppercase tracking-widest font-bold text-slate-400 mb-2">
                   {acc.type}
@@ -184,7 +184,6 @@ export default function AccountsPage() {
         </div>
       )}
 
-      {/* 🔹 MODAL */}
       <CreateAccountModal
         isOpen={openModal}
         onClose={() => setOpenModal(false)}
@@ -194,7 +193,6 @@ export default function AccountsPage() {
   );
 }
 
-/* 🔹 CREATE ACCOUNT MODAL */
 function CreateAccountModal({ isOpen, onClose, refreshAccounts }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -210,10 +208,12 @@ function CreateAccountModal({ isOpen, onClose, refreshAccounts }) {
       setIsSubmitting(true);
       const token = localStorage.getItem("token");
       const storedUser = localStorage.getItem("user");
-      const user = storedUser ? JSON.parse(storedUser) : null;
 
-      if (!user?._id) {
-        alert("Session expired. Please log in again.");
+      const user = storedUser ? JSON.parse(storedUser) : null;
+      const currentUserId = user?._id || user?.id;
+
+      if (!currentUserId) {
+        alert("Session expired or invalid user profile. Please log in again.");
         return;
       }
 
@@ -224,7 +224,7 @@ function CreateAccountModal({ isOpen, onClose, refreshAccounts }) {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          userId: user._id, // Critical structural fix
+          userId: currentUserId, // Uses the safe fallback ID
           name: formData.name,
           type: formData.type,
           balance: Number(formData.balance) || 0,
@@ -237,10 +237,10 @@ function CreateAccountModal({ isOpen, onClose, refreshAccounts }) {
         setFormData({ name: "", type: "Asset", balance: "" });
       } else {
         const errorData = await res.json();
-        console.error("Account registration failure:", errorData.error);
+        alert(errorData.error || "Failed to create account");
       }
     } catch (error) {
-      console.error(error);
+      console.error("Modal submission error:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -250,7 +250,6 @@ function CreateAccountModal({ isOpen, onClose, refreshAccounts }) {
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* OVERLAY */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -259,7 +258,6 @@ function CreateAccountModal({ isOpen, onClose, refreshAccounts }) {
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
           />
 
-          {/* MODAL */}
           <motion.div
             initial={{ opacity: 0, scale: 0.92, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -268,7 +266,6 @@ function CreateAccountModal({ isOpen, onClose, refreshAccounts }) {
             className="fixed inset-0 z-[60] flex items-center justify-center p-4"
           >
             <div className="w-full max-w-3xl bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-              {/* HEADER */}
               <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
                 <div>
                   <h2 className="text-2xl font-black text-slate-900 dark:text-white">
@@ -288,9 +285,7 @@ function CreateAccountModal({ isOpen, onClose, refreshAccounts }) {
                 </button>
               </div>
 
-              {/* FORM */}
               <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-8">
-                {/* ACCOUNT NAME */}
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase tracking-widest text-slate-400">
                     Account Name
@@ -310,7 +305,6 @@ function CreateAccountModal({ isOpen, onClose, refreshAccounts }) {
                   />
                 </div>
 
-                {/* BALANCE */}
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase tracking-widest text-slate-400">
                     Opening Balance
@@ -331,7 +325,6 @@ function CreateAccountModal({ isOpen, onClose, refreshAccounts }) {
                   />
                 </div>
 
-                {/* ACCOUNT TYPES */}
                 <div className="space-y-4">
                   <label className="text-xs font-bold uppercase tracking-widest text-slate-400">
                     Account Type
@@ -380,7 +373,6 @@ function CreateAccountModal({ isOpen, onClose, refreshAccounts }) {
                   </div>
                 </div>
 
-                {/* ACTIONS */}
                 <div className="flex flex-col-reverse md:flex-row gap-4 pt-2">
                   <button
                     type="button"
