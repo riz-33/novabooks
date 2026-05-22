@@ -41,7 +41,7 @@ export default function RegisterPage() {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
         Cookies.set("token", data.token, { expires: 1 });
-        router.push("/dashboard");
+        router.push("/login");
       } else {
         showToast.error(data.error || "Something went wrong", {
           duration: 4000,
