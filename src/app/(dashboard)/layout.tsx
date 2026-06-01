@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import Cookies from "js-cookie";
 
 /* 🔐 ROLE BASED MENU */
 const navConfig = {
@@ -273,6 +274,7 @@ export default function DashboardLayout({ children }) {
               width={150}
               height={32}
               className="cursor-pointer dark:brightness-50 dark:invert"
+              onClick={() => (window.location.href = "/dashboard")}
             />
 
             {/* <div className="flex items-center gap-4"> */}
@@ -350,7 +352,7 @@ export default function DashboardLayout({ children }) {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="absolute right-0 top-12 w-52 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 shadow-xl backdrop-blur-md rounded-xl p-2 z-50 border border-slate-200 dark:border-slate-700"
+                    className="absolute right-0 top-11 w-52 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 shadow-xl backdrop-blur-md rounded-xl p-2 z-50 border border-slate-200 dark:border-slate-700"
                   >
                     <Link
                       href="/profile"
@@ -366,7 +368,14 @@ export default function DashboardLayout({ children }) {
                       Settings
                     </Link>
 
-                    <button className="w-full text-left p-2 rounded-lg hover:bg-red-50 text-red-500 transition">
+                    <button
+                      className="w-full text-left p-2 rounded-lg hover:bg-red-50 text-red-500 transition"
+                      onClick={() => {
+                        Cookies.remove("token", { path: "/" }); 
+                        localStorage.removeItem("token");
+                        window.location.href = "/login";
+                      }}
+                    >
                       Logout
                     </button>
                   </motion.div>

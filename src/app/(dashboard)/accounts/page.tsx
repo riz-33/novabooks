@@ -11,6 +11,7 @@ import {
   PieChart,
   TrendingUp,
   TrendingDown,
+  FileText,
 } from "lucide-react";
 
 import { motion, AnimatePresence } from "framer-motion";
@@ -126,7 +127,7 @@ export default function AccountsPage() {
         </div>
       ) : accounts.length === 0 ? (
         <div className="bg-white dark:bg-slate-800 rounded-3xl p-10 border border-slate-200 dark:border-slate-700 text-center">
-          <Wallet
+          <Landmark
             size={60}
             className="mx-auto text-slate-300 dark:text-slate-600 mb-4"
           />
@@ -156,11 +157,23 @@ export default function AccountsPage() {
             >
               <div className="flex items-start justify-between mb-5">
                 <div className="p-3 rounded-2xl bg-blue-50 dark:bg-slate-700 text-nova-navy dark:text-white">
-                  <Wallet size={24} />
+                  {acc.type === "Asset" ? (
+                    <Landmark size={24} />
+                  ) : acc.type === "Liability" ? (
+                    <ShieldCheck size={24} />
+                  ) : acc.type === "Equity" ? (
+                    <PieChart size={24} />
+                  ) : acc.type === "Income" ? (
+                    <TrendingUp size={24} />
+                  ) : acc.type === "Expense" ? (
+                    <TrendingDown size={24} />
+                  ) : (
+                    <FileText size={24} />
+                  )}
                 </div>
 
                 <button className="text-slate-400 hover:text-slate-700 dark:hover:text-white transition">
-                  <MoreVertical size={20} />
+                  {/* <MoreVertical size={20} /> */}
                 </button>
               </div>
 
