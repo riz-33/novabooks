@@ -47,12 +47,44 @@ export default function DashboardLayout({ children }) {
   const [userMenu, setUserMenu] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const role = "admin";
   const navItems = navConfig[role];
 
   const isActive = (path) => pathname === path;
 
+  const getUser = async () => {
+    const token = Cookies.get("token") || localStorage.getItem("token");
+
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) throw new Error("Failed to fetch user");
+
+      const data = await res.json();
+      if (data && data.user) {
+        setUser(data.user);
+        console.log("User state successfully set to:", data.user);
+      } else {
+        throw new Error("User object missing from API response payload");
+      }
+    } catch (error) {
+      console.error("Auth error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getUser();
+  }, []);
+
+  console.log("Current user state:", user); // Debug log
   useEffect(() => {
     setMobileSidebarOpen(false); // close mobile sidebar on desktop toggle
   }, [pathname]);
@@ -283,6 +315,18 @@ export default function DashboardLayout({ children }) {
           </div>
 
           <div className="flex items-center gap-4">
+            <div className="text-sm">
+              {loading ? (
+                <span></span>
+              ) : user ? (
+                // 3. Render the username dynamically
+                <span>
+                  Welcome, <strong>{user.name.toUpperCase()}</strong>
+                </span>
+              ) : (
+                <span>Not logged in</span>
+              )}
+            </div>
             {/* 🌙 Dark Mode */}
             <button
               aria-label="Toggle dark mode"
@@ -371,7 +415,7 @@ export default function DashboardLayout({ children }) {
                     <button
                       className="w-full text-left p-2 rounded-lg hover:bg-red-50 text-red-500 transition"
                       onClick={() => {
-                        Cookies.remove("token", { path: "/" }); 
+                        Cookies.remove("token", { path: "/" });
                         localStorage.removeItem("token");
                         window.location.href = "/login";
                       }}
