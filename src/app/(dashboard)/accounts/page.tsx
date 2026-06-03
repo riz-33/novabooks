@@ -117,11 +117,11 @@ export default function AccountsPage() {
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
-              className="h-52 rounded-3xl bg-slate-200 dark:bg-slate-800 animate-pulse"
+              className="h-32 rounded-3xl bg-slate-200 dark:bg-slate-800 animate-pulse"
             />
           ))}
         </div>
@@ -148,15 +148,15 @@ export default function AccountsPage() {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {accounts.map((acc) => (
             <motion.div
               key={acc._id}
               whileHover={{ y: -5 }}
               className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-6 rounded-3xl shadow-sm hover:shadow-xl transition-all"
             >
-              <div className="flex items-start justify-between mb-5">
-                <div className="p-3 rounded-2xl bg-blue-50 dark:bg-slate-700 text-nova-navy dark:text-white">
+              <div className="flex items-start gap-4">
+                <div className="p-2 rounded-2xl bg-blue-50 dark:bg-slate-700 text-nova-navy dark:text-white">
                   {acc.type === "Asset" ? (
                     <Landmark size={24} />
                   ) : acc.type === "Liability" ? (
@@ -172,22 +172,20 @@ export default function AccountsPage() {
                   )}
                 </div>
 
-                <button className="text-slate-400 hover:text-slate-700 dark:hover:text-white transition">
-                  {/* <MoreVertical size={20} /> */}
-                </button>
-              </div>
+                {/* <button className="text-slate-400 hover:text-slate-700 dark:hover:text-white transition"> */}
+                {/* <MoreVertical size={20} /> */}
+                {/* </button> */}
 
-              <div>
-                <p className="text-xs uppercase tracking-widest font-bold text-slate-400 mb-2">
-                  {acc.type}
-                </p>
+                <div>
+                  <p className="text-xs uppercase tracking-widest font-bold text-slate-400">
+                    {acc.type}
+                  </p>
 
-                <h3 className="text-xl font-black text-slate-900 dark:text-white">
-                  {acc.name}
-                </h3>
+                  <h3 className="text-l font-black text-slate-900 dark:text-white">
+                    {acc.name}
+                  </h3>
 
-                <div className="mt-5">
-                  <p className="text-3xl font-black text-slate-900 dark:text-white">
+                  <p className="text-2xl font-black text-slate-900 dark:text-white">
                     PKR {Number(acc.balance).toLocaleString()}
                   </p>
                 </div>
@@ -298,15 +296,21 @@ function CreateAccountModal({ isOpen, onClose, refreshAccounts }) {
                 </button>
               </div>
 
-              <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-8">
-                <div className="space-y-2">
+              <form onSubmit={handleSubmit} className="p-6 md:p-8 ">
+                <div className="grid grid-cols-2 gap-2">
                   <label className="text-xs font-bold uppercase tracking-widest text-slate-400">
                     Account Name
                   </label>
 
+                  <label className="text-xs font-bold uppercase tracking-widest text-slate-400">
+                    Opening Balance
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
                   <input
                     required
-                    placeholder="Main Business Account"
+                    placeholder="Main Bank Account"
                     value={formData.name}
                     onChange={(e) =>
                       setFormData({
@@ -314,14 +318,8 @@ function CreateAccountModal({ isOpen, onClose, refreshAccounts }) {
                         name: e.target.value,
                       })
                     }
-                    className="w-full px-5 py-4 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-transparent focus:border-nova-navy dark:text-white outline-none"
+                    className="w-full px-2 py-2 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-transparent focus:border-nova-navy dark:text-white outline-none"
                   />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-widest text-slate-400">
-                    Opening Balance
-                  </label>
 
                   <input
                     required
@@ -334,11 +332,11 @@ function CreateAccountModal({ isOpen, onClose, refreshAccounts }) {
                         balance: e.target.value,
                       })
                     }
-                    className="w-full px-5 py-4 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-transparent focus:border-nova-navy dark:text-white outline-none"
+                    className="w-full px-2 py-2 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-transparent focus:border-nova-navy dark:text-white outline-none"
                   />
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-4 mt-4">
                   <label className="text-xs font-bold uppercase tracking-widest text-slate-400">
                     Account Type
                   </label>
@@ -354,7 +352,7 @@ function CreateAccountModal({ isOpen, onClose, refreshAccounts }) {
                             type: type.value,
                           })
                         }
-                        className={`flex items-start gap-4 p-4 rounded-2xl border-2 transition-all text-left
+                        className={`flex items-start gap-4 p-2 rounded-2xl border-2 transition-all text-left
                         ${
                           formData.type === type.value
                             ? "border-nova-navy bg-blue-50 dark:bg-slate-800"
@@ -386,11 +384,11 @@ function CreateAccountModal({ isOpen, onClose, refreshAccounts }) {
                   </div>
                 </div>
 
-                <div className="flex flex-col-reverse md:flex-row gap-4 pt-2">
+                <div className="flex flex-col-reverse md:flex-row gap-4 pt-4">
                   <button
                     type="button"
                     onClick={onClose}
-                    className="flex-1 py-4 rounded-2xl font-bold border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                    className="flex-1 py-2 rounded-2xl font-bold border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
                   >
                     Cancel
                   </button>
@@ -398,7 +396,7 @@ function CreateAccountModal({ isOpen, onClose, refreshAccounts }) {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex-[2] py-4 rounded-2xl bg-nova-navy text-white font-black shadow-xl hover:scale-[1.01] active:scale-[0.98] transition disabled:opacity-50"
+                    className="flex-[2] py-2 rounded-2xl bg-nova-navy text-white font-black shadow-xl hover:scale-[1.01] active:scale-[0.98] transition disabled:opacity-50"
                   >
                     {isSubmitting ? "Creating..." : "ADD ACCOUNT"}
                   </button>

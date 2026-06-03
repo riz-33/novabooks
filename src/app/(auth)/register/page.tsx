@@ -38,9 +38,9 @@ export default function RegisterPage() {
           transition: "bounceIn",
           progress: true,
         });
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-        Cookies.set("token", data.token, { expires: 1 });
+        // localStorage.setItem("token", data.token);
+        // localStorage.setItem("user", JSON.stringify(data.user));
+        // Cookies.set("token", data.token, { expires: 1 });
         router.push("/login");
       } else {
         showToast.error(data.error || "Something went wrong", {

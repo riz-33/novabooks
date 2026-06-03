@@ -26,6 +26,7 @@ export const config = {
     "/accounts/:path*",
     "/ledger/:path*",
     "/pnl/:path*",
+    "/balance-sheet/:path*",
     "/login",
     "/register",
   ],
