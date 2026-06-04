@@ -12,11 +12,7 @@ export async function GET() {
     const headerList = await headers();
     const authHeader = headerList.get("authorization");
 
-    // 1. Structural Header Guard
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      console.error(
-        "Backend Auth Error: Missing or malformed Authorization header.",
-      );
       return NextResponse.json(
         { error: "Missing authorization token structure" },
         { status: 401 },
@@ -25,39 +21,25 @@ export async function GET() {
 
     const token = authHeader.split(" ")[1];
 
-    // 2. JWT Verification Try/Catch Guard
     let userSession: any;
     try {
-      if (!process.env.JWT_SECRET) {
-        console.error(
-          "CRITICAL: JWT_SECRET environment variable is completely missing.",
-        );
-        return NextResponse.json(
-          { error: "Server Configuration Error" },
-          { status: 500 },
-        );
-      }
-
-      userSession = jwt.verify(token, process.env.JWT_SECRET);
+      userSession = jwt.verify(token, process.env.JWT_SECRET!);
     } catch (jwtError: any) {
-      console.error(
-        "Backend Auth Error: JWT verification crashed ->",
-        jwtError.message,
-      );
+      console.error("JWT verification crashed ->", jwtError.message);
       return NextResponse.json(
         { error: "Session expired or invalid token structure." },
         { status: 401 },
       );
     }
 
-    // 3. Payload Key Assertions Guard
+    // 👈 FIXED: Match the payload structure from your login sign method
     if (
       !userSession ||
       typeof userSession === "string" ||
-      !userSession.companyId
+      !userSession.userId
     ) {
       console.error(
-        "Backend Auth Error: Token verified but 'companyId' key is missing from payload structure.",
+        "Backend Auth Error: 'userId' key is missing from payload.",
       );
       return NextResponse.json(
         { error: "Unauthorized access profile configuration" },
@@ -65,27 +47,19 @@ export async function GET() {
       );
     }
 
-    // Convert string parameter to valid MongoDB ObjectId
-    const companyId = new mongoose.Types.ObjectId(
-      userSession.companyId as string,
-    );
+    // 👈 UPDATED: Convert the matched userId string parameter to a valid Mongoose ObjectId
+    const userId = new mongoose.Types.ObjectId(userSession.userId as string);
 
-    // --- REVENUE AGGREGATIONS CONTINUE BELOW ---
+    // 2. Fetch Aggregated Metrics from Database matching the user's ID field
     const revenueAggregate = await Transaction.aggregate([
-      { $match: { companyId: companyId, accountType: "Revenue" } },
+      { $match: { userId: userId, accountType: "Revenue" } }, // 👈 Updated query match criteria
       { $group: { _id: null, total: { $sum: "$amount" } } },
     ]);
 
-    // ... Rest of your aggregation pipelines and final code response block
-
     const receivablesAggregate = await Transaction.aggregate([
       {
-        $match: {
-          companyId: companyId,
-          accountType: "Receivable",
-          status: "Unpaid",
-        },
-      }, // Used casted ID
+        $match: { userId: userId, accountType: "Receivable", status: "Unpaid" },
+      }, // 👈 Updated query match criteria
       { $group: { _id: null, total: { $sum: "$amount" } } },
     ]);
 
@@ -96,7 +70,7 @@ export async function GET() {
     const monthlyFlow = await Transaction.aggregate([
       {
         $match: {
-          companyId: companyId, // Used casted ID
+          userId: userId, // 👈 Updated query match criteria
           date: { $gte: sixMonthsAgo },
         },
       },
@@ -132,7 +106,6 @@ export async function GET() {
       { name: string; revenue: number; expense: number }
     > = {};
 
-    // Seed structure cleanly
     monthlyFlow.forEach((item) => {
       const label = `${monthNames[item._id.month - 1]}`;
       if (!barDataMap[label]) {
@@ -146,26 +119,32 @@ export async function GET() {
 
     // 4. Fetch Expense Categories Distribution
     const categoryDistribution = await Transaction.aggregate([
-      { $match: { companyId: companyId, type: "expense" } }, // Used casted ID
+      { $match: { userId: userId, type: "expense" } }, // 👈 Updated query match criteria
       { $group: { _id: "$category", value: { $sum: "$amount" } } },
       { $project: { name: "$_id", value: 1, _id: 0 } },
       { $limit: 3 },
     ]);
 
     // 5. Stream the Most Recent Transactions Log
-    const rawTransactions = await Transaction.find({ companyId: companyId }) // Used casted ID
+    const rawTransactions = await Transaction.find({ userId: userId })
       .sort({ date: -1 })
       .limit(3)
       .lean();
 
-    const recentTransactions = rawTransactions.map((tx: any) => ({
-      id: tx._id.toString(),
-      type: tx.type,
-      title: tx.description || "Ledger Transaction",
-      meta: `${tx.reference || "No Ref"} • ${tx.status || "Completed"}`,
-      amount: `${tx.type === "revenue" ? "+" : "-"}Rs. ${tx.amount.toLocaleString()}`,
-      isPositive: tx.type === "revenue",
-    }));
+    const recentTransactions = rawTransactions.map((tx: any) => {
+      // Safe Fallback: Extract the number if it exists, otherwise default to 0
+      const transactionAmount = typeof tx.amount === "number" ? tx.amount : 0;
+
+      return {
+        id: tx._id.toString(),
+        type: tx.type || "expense",
+        title: tx.description || "Ledger Transaction",
+        meta: `${tx.reference || "No Ref"} • ${tx.status || "Completed"}`,
+        // 👈 FIXED: We call .toLocaleString() on the safe fallback variable
+        amount: `${tx.type === "revenue" ? "+" : "-"}Rs. ${transactionAmount.toLocaleString()}`,
+        isPositive: tx.type === "revenue",
+      };
+    });
 
     return NextResponse.json(
       {
