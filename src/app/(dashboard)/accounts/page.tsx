@@ -98,7 +98,7 @@ export default function AccountsPage() {
     <div className="p-4 md:p-8 max-w-[1400px] mx-auto">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 mb-8">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 dark:text-white">
+          <h1 className="text-3xl font-black text-nova-navy dark:text-white">
             My Accounts
           </h1>
 

@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Calendar, TrendingUp, TrendingDown, Minus } from "lucide-react";
 
-// 1. Define Interfaces for your data
 interface FinanceItem {
   name: string;
   amount: number;
@@ -21,7 +20,6 @@ interface DateRange {
 }
 
 export default function ProfitLoss() {
-  // 2. Add types to your state
   const [reportData, setReportData] = useState<ReportData>({
     income: [],
     expenses: [],
@@ -37,51 +35,71 @@ export default function ProfitLoss() {
 
   const [loading, setLoading] = useState<boolean>(true);
 
-  //   useEffect(() => {
-  //     const fetchPL = async () => {
-  //       // In Next.js, we check for window to ensure we are on the client
-  //       if (typeof window === "undefined") return;
+  // Safely extract target user parameters inside browser storage boundaries
+  const getUserId = () => {
+    if (typeof window === "undefined") return null;
+    const storedUser = localStorage.getItem("user");
+    const user = storedUser ? JSON.parse(storedUser) : null;
+    return user?._id || user?.id;
+  };
 
-  //       setLoading(true);
-  //       try {
-  //         const token = localStorage.getItem("token");
-  //         const res = await axios.get(
-  //           `/api/reports/profit-loss?start=${dateRange.start}&end=${dateRange.end}`,
-  //           {
-  //             headers: {
-  //               Authorization: `Bearer ${token}`,
-  //             },
-  //           },
-  //         );
-  //         setReportData(res.data);
-  //       } catch (err) {
-  //         console.error("P&L Fetch Error:", err);
-  //       } finally {
-  //         setLoading(false);
-  //       }
-  //     };
-  //     fetchPL();
-  //   }, [dateRange]);
+  // Wrapped in useCallback to prevent infinite re-renders inside the hook dependency matrix
+  const fetchPL = useCallback(async () => {
+    const userId = getUserId();
+    if (!userId) return;
 
-  // 3. Calculated values with optional chaining safely typed
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(
+        `/api/reports/profit-loss?userId=${userId}&start=${dateRange.start}&end=${dateRange.end}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error("Could not retrieve ledger statement records");
+
+      const data = await res.json();
+      setReportData({
+        income: data.income || [],
+        expenses: data.expenses || [],
+        netProfit: data.netProfit || 0,
+      });
+    } catch (err) {
+      console.error("P&L Fetch Error:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [dateRange.start, dateRange.end]);
+
+  useEffect(() => {
+    fetchPL();
+  }, [fetchPL]);
+
+  // Derived accounting calculations
   const totalIncome = reportData.income.reduce((s, a) => s + a.amount, 0);
   const totalExpenses = reportData.expenses.reduce((s, a) => s + a.amount, 0);
-  const netProfit = totalIncome - totalExpenses;
+  const calculatedNetProfit = totalIncome - totalExpenses;
 
-  if (loading && reportData.income.length === 0) {
+  if (loading && reportData.income.length === 0 && reportData.expenses.length === 0) {
     return (
-      <div className="p-8 text-center font-bold text-nova-navy">
-        Loading Statement...
+      <div className="flex items-center justify-center min-h-[400px] font-black text-nova-navy tracking-widest text-sm animate-pulse">
+        LOADING STATEMENT VOUCHERS...
       </div>
     );
   }
 
   return (
-    <div className="p-8 max-w-5xl mx-auto">
+    <div className="p-4 md:p-8 max-w-[1400px] mx-auto">
       {/* Header & Date Controls */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
         <div>
-          <h1 className="text-4xl font-black text-nova-navy tracking-tight">
+          <h1 className="text-4xl font-black text-nova-navy tracking-tight dark:text-white">
             Profit & Loss
           </h1>
           <p className="text-nova-gold font-bold text-xs uppercase tracking-widest mt-1">
@@ -89,9 +107,9 @@ export default function ProfitLoss() {
           </p>
         </div>
 
-        <div className="flex items-center gap-4 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm">
-          <div className="flex items-center gap-2 px-3">
-            <Calendar size={16} className="text-gray-400" />
+        <div className="flex items-center gap-4 bg-white p-3 rounded-2xl border border-gray-100 shadow-sm w-full md:w-auto justify-between md:justify-start">
+          <div className="flex items-center gap-2 px-1">
+            <Calendar size={16} className="text-gray-400 text-shrink-0" />
             <input
               type="date"
               value={dateRange.start}
@@ -102,7 +120,7 @@ export default function ProfitLoss() {
             />
           </div>
           <Minus size={12} className="text-gray-300" />
-          <div className="flex items-center gap-2 px-3">
+          <div className="flex items-center gap-2 px-1">
             <input
               type="date"
               value={dateRange.end}
@@ -117,72 +135,82 @@ export default function ProfitLoss() {
 
       {/* Summary Banner */}
       <div
-        className={`mb-12 p-10 rounded-[3rem] flex flex-col items-center justify-center text-center shadow-2xl transition-all duration-500 ${
-          netProfit >= 0
+        className={`mb-12 p-5 rounded-[3rem] flex flex-col items-center justify-center text-center shadow-2xl transition-all duration-500 ${
+          calculatedNetProfit >= 0
             ? "bg-nova-navy text-white shadow-blue-900/20"
-            : "bg-rose-900 text-white shadow-rose-900/20"
+            : "bg-rose-950 text-white shadow-rose-950/20"
         }`}
       >
         <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60 mb-2">
           Net Profit / Loss
         </p>
-        <h2 className="text-6xl font-black mb-4">
-          ${netProfit.toLocaleString()}
+        <h2 className="text-3xl md:text-4xl font-black mb-4 tracking-tight">
+          PKR {calculatedNetProfit.toLocaleString()}
         </h2>
         <div className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full backdrop-blur-md">
-          {netProfit >= 0 ? (
+          {calculatedNetProfit >= 0 ? (
             <TrendingUp size={18} className="text-emerald-400" />
           ) : (
             <TrendingDown size={18} className="text-rose-400" />
           )}
           <span className="text-xs font-black uppercase tracking-widest">
-            {netProfit >= 0 ? "Profitable Period" : "Net Loss Period"}
+            {calculatedNetProfit >= 0 ? "Profitable Period" : "Net Loss Period"}
           </span>
         </div>
       </div>
 
-      {/* Income & Expense Breakdown */}
+      {/* Income & Expense Breakdown Panels */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-        <div className="bg-white p-10 rounded-[2.5rem] border border-gray-50 shadow-sm">
-          <h3 className="text-lg font-black text-nova-navy mb-8 border-b border-gray-100 pb-4 flex justify-between">
-            INCOME <span className="text-emerald-600">+</span>
+        {/* Income Card */}
+        <div className="bg-white p-8 md:p-10 rounded-[2.5rem] border border-gray-100 shadow-sm">
+          <h3 className="text-lg font-black text-nova-navy mb-8 border-b border-gray-100 pb-4 flex justify-between items-center">
+            INCOME <span className="text-emerald-600 font-black text-xl">+</span>
           </h3>
           <div className="space-y-6">
-            {reportData.income.map((item, i) => (
-              <PLLine
-                key={i}
-                label={item.name}
-                amount={item.amount}
-                color="text-emerald-600"
-              />
-            ))}
+            {reportData.income.length === 0 ? (
+              <p className="text-sm font-bold text-gray-400 italic">No revenue items logged.</p>
+            ) : (
+              reportData.income.map((item, i) => (
+                <PLLine
+                  key={i}
+                  label={item.name}
+                  amount={item.amount}
+                  color="text-emerald-600"
+                />
+              ))
+            )}
             <div className="pt-6 border-t-2 border-dashed border-gray-100 flex justify-between font-black text-nova-navy">
-              <span className="text-xs uppercase tracking-widest">
+              <span className="text-xs uppercase tracking-widest align-middle flex items-center">
                 Total Income
               </span>
-              <span>${totalIncome.toLocaleString()}</span>
+              <span>PKR {totalIncome.toLocaleString()}</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-10 rounded-[2.5rem] border border-gray-50 shadow-sm">
-          <h3 className="text-lg font-black text-nova-navy mb-8 border-b border-gray-100 pb-4 flex justify-between">
-            EXPENSES <span className="text-rose-600">-</span>
+        {/* Expense Card */}
+        <div className="bg-white p-8 md:p-10 rounded-[2.5rem] border border-gray-100 shadow-sm">
+          <h3 className="text-lg font-black text-nova-navy mb-8 border-b border-gray-100 pb-4 flex justify-between items-center">
+            EXPENSES <span className="text-rose-600 font-black text-xl">-</span>
           </h3>
           <div className="space-y-6">
-            {reportData.expenses.map((item, i) => (
-              <PLLine
-                key={i}
-                label={item.name}
-                amount={item.amount}
-                color="text-rose-600"
-              />
-            ))}
+            {reportData.expenses.length === 0 ? (
+              <p className="text-sm font-bold text-gray-400 italic">No expense entries logged.</p>
+            ) : (
+              reportData.expenses.map((item, i) => (
+                <PLLine
+                  key={i}
+                  label={item.name}
+                  amount={item.amount}
+                  color="text-rose-600"
+                />
+              ))
+            )}
             <div className="pt-6 border-t-2 border-dashed border-gray-100 flex justify-between font-black text-nova-navy">
-              <span className="text-xs uppercase tracking-widest">
+              <span className="text-xs uppercase tracking-widest align-middle flex items-center">
                 Total Expenses
               </span>
-              <span>${totalExpenses.toLocaleString()}</span>
+              <span>PKR {totalExpenses.toLocaleString()}</span>
             </div>
           </div>
         </div>
@@ -191,7 +219,6 @@ export default function ProfitLoss() {
   );
 }
 
-// 4. Properly typed sub-component
 interface PLLineProps {
   label: string;
   amount: number;
@@ -203,6 +230,6 @@ const PLLine = ({ label, amount, color }: PLLineProps) => (
     <span className="text-gray-500 font-bold text-sm group-hover:text-nova-navy transition-colors">
       {label}
     </span>
-    <span className={`font-black ${color}`}>${amount.toLocaleString()}</span>
+    <span className={`font-black ${color}`}>PKR {amount.toLocaleString()}</span>
   </div>
 );

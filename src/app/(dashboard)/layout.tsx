@@ -305,7 +305,7 @@ export default function DashboardLayout({ children }) {
               alt="NovaBooks Logo"
               width={150}
               height={32}
-              className="cursor-pointer dark:brightness-50 dark:invert"
+              className="cursor-pointer dark:brightness-50 dark:invert hidden md:block"
               onClick={() => (window.location.href = "/dashboard")}
             />
 
@@ -315,12 +315,12 @@ export default function DashboardLayout({ children }) {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="text-sm">
+            <div className="text-sm ml-5">
               {loading ? (
                 <span></span>
               ) : user ? (
                 // 3. Render the username dynamically
-                <span>
+                <span className="font-medium text-nova-navy dark:text-white">
                   Welcome, <strong>{user.name.toUpperCase()}</strong>
                 </span>
               ) : (
