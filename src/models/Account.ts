@@ -1,6 +1,5 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
-// Define the shape of a User in TypeScript
 export interface IAccount extends Document {
   userId: mongoose.Types.ObjectId;
   name: string;
@@ -32,12 +31,11 @@ const AccountSchema: Schema = new Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-// Use existing model or create new one with the IAccount type
+// 💡 FIX: Define the unique compound index correctly on the schema
+AccountSchema.index({ userId: 1, name: 1 }, { unique: true });
+
+// Use existing model or create new one cleanly
 const Account: Model<IAccount> =
-  mongoose.models.Account ||
-  mongoose.model<IAccount>(
-    "Account",
-    AccountSchema.index({ userId: 1, name: 1 }, { unique: true }),
-  );
+  mongoose.models.Account || mongoose.model<IAccount>("Account", AccountSchema);
 
 export default Account;

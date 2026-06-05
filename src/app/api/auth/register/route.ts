@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import User from "@/models/User";
-import Account from "@/models/Accounts";
+import Account from "@/models/Account";
 import { hash } from "bcrypt-ts";
 
 export async function POST(req: Request) {
@@ -70,7 +70,9 @@ export async function POST(req: Request) {
       { message: "User registered successfully" },
       { status: 201 },
     );
+    // Inside your user registration POST route catch block:
   } catch (error) {
+    console.error("CRITICAL REGISTRATION FAILURE:", error);
     return NextResponse.json({ error: "Server Error" }, { status: 500 });
   }
 }

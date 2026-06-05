@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Transaction from "@/models/Transaction";
-import Account from "@/models/Accounts";
+import Account from "@/models/Account";
 
 export async function POST(req: Request) {
   try {

@@ -69,12 +69,12 @@ export default function DashboardLayout({ children }) {
       const data = await res.json();
       if (data && data.user) {
         setUser(data.user);
-        console.log("User state successfully set to:", data.user);
+        // console.log("User state successfully set to:", data.user);
       } else {
         throw new Error("User object missing from API response payload");
       }
     } catch (error) {
-      console.error("Auth error:", error);
+      // console.error("Auth error:", error);
     } finally {
       setLoading(false);
     }
@@ -84,7 +84,7 @@ export default function DashboardLayout({ children }) {
     getUser();
   }, []);
 
-  console.log("Current user state:", user); // Debug log
+  // console.log("Current user state:", user); 
   useEffect(() => {
     setMobileSidebarOpen(false); // close mobile sidebar on desktop toggle
   }, [pathname]);

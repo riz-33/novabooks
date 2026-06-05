@@ -1,4 +1,4 @@
-import Account from "@/models/Accounts";
+import Account from "@/models/Account";
 import Transaction from "@/models/Transaction";
 import connectDB from "@/lib/db";
 import { NextResponse } from "next/server";
