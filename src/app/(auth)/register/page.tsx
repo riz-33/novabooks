@@ -6,12 +6,11 @@ import { useRouter } from "next/navigation"; // Added useRouter
 import { User, Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { showToast } from "nextjs-toast-notify";
-import Cookies from "js-cookie";
+import axios from "node_modules/axios/index.cjs";
 
 export default function RegisterPage() {
-  const router = useRouter(); // Initialize router
+  const router = useRouter();
 
-  // 1. Setup State
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -20,32 +19,23 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault(); // Prevent page reload
+    e.preventDefault();
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        body: JSON.stringify(formData), // Use formData state
-        headers: { "Content-Type": "application/json" },
-      });
+      const res = await axios.post("/api/auth/register", formData);
 
-      const data = await res.json();
-      if (res.ok) {
+      const data = await res.data;
+      if (res.status === 200) {
         showToast.success("Account created successfully!", {
           duration: 4000,
-          // position: "top-right",
           transition: "bounceIn",
           progress: true,
         });
-        // localStorage.setItem("token", data.token);
-        // localStorage.setItem("user", JSON.stringify(data.user));
-        // Cookies.set("token", data.token, { expires: 1 });
         router.push("/login");
       } else {
         showToast.error(data.error || "Something went wrong", {
           duration: 4000,
-          // position: "top-right",
           transition: "bounceIn",
           progress: true,
         });
@@ -54,7 +44,6 @@ export default function RegisterPage() {
       console.error(err);
       showToast.error("An error occurred. Please try again.", {
         duration: 4000,
-        // position: "top-right",
         transition: "bounceIn",
         progress: true,
       });
@@ -71,9 +60,9 @@ export default function RegisterPage() {
             className="mx-auto mb-4 object-contain"
             src="/logo2.png"
             alt="NovaBooks"
-            width={150} // Slightly larger for better visibility
+            width={150}
             height={80}
-            priority // Adds a performance boost for the logo
+            priority
           />
           <h1 className="text-4xl font-black text-nova-navy tracking-tighter">
             NOVABOOKS
@@ -148,7 +137,6 @@ export default function RegisterPage() {
   );
 }
 
-// Updated AuthInput to handle values and changes
 function AuthInput({ icon, label, placeholder, type, value, onChange }: any) {
   return (
     <div className="space-y-2">

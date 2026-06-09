@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
+import Cookies from "js-cookie";
 
 interface User {
   id: string;
@@ -41,6 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(userData);
     localStorage.setItem("token", newToken);
     localStorage.setItem("user", JSON.stringify(userData));
+    Cookies.set("token", newToken, { expires: 1 });
     axios.defaults.headers.common["Authorization"] = `Bearer ${newToken}`;
   };
 

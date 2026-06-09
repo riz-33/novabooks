@@ -1,4 +1,5 @@
 import { Outfit, Geist, Geist_Mono } from "next/font/google";
+import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -24,12 +25,14 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html
-      lang="en"  suppressHydrationWarning
+      lang="en" suppressHydrationWarning
       className={` ${outfit.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
     >
-      <body className="bg-slate-50 text-slate-900 selection:bg-nova-gold/30">
-        {children}
-      </body>
+      <AuthProvider>
+        <body className="bg-slate-50 text-slate-900 selection:bg-nova-gold/30">
+          {children}
+        </body>
+      </AuthProvider>
     </html>
   );
 }

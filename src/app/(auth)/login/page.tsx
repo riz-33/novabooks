@@ -1,46 +1,40 @@
 "use client";
 
-import Cookies from "js-cookie";
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { showToast } from "nextjs-toast-notify";
+import { useAuth } from "@/context/AuthContext";
+import axios from "axios";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { login } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        body: JSON.stringify(formData),
-        headers: { "Content-Type": "application/json" },
-      });
+      const res = await axios.post("/api/auth/login", formData);
+      login(res.data.token, res.data.user);
 
-      const data = await res.json();
+      const data = res.data;
 
-      if (res.ok) {
+      if (res.status === 200) {
         showToast.success("Logged in successfully!", {
           duration: 4000,
-          // position: "top-right",
           transition: "bounceIn",
           progress: true,
         });
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-        Cookies.set("token", data.token, { expires: 1 });
         router.push("/dashboard");
       } else {
         showToast.error(data.error || "Something went wrong", {
           duration: 4000,
-          // position: "top-right",
           transition: "bounceIn",
           progress: true,
         });
@@ -48,7 +42,6 @@ export default function LoginPage() {
     } catch (err) {
       showToast.error("An error occurred. Please try again.", {
         duration: 4000,
-        // position: "top-right",
         transition: "bounceIn",
         progress: true,
       });
@@ -61,15 +54,14 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
-        {/* Logo / Brand */}
         <div className="text-center mb-4">
           <Image
             className="mx-auto mb-4 object-contain"
             src="/logo2.png"
             alt="NovaBooks"
-            width={150} // Slightly larger for better visibility
+            width={150}
             height={80}
-            priority// Adds a performance boost for the logo
+            priority
           />
           <h1 className="text-4xl font-black text-nova-navy tracking-tighter">
             NOVABOOKS
