@@ -3,6 +3,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import axios from "axios";
 import {
   LayoutDashboard,
   Wallet,
@@ -47,44 +49,35 @@ export default function DashboardLayout({ children }) {
   const [userMenu, setUserMenu] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [userData, setUserData] = useState(null);
+  // const [loading, setLoading] = useState(true);
+  const { user, loading } = useAuth();
 
   const role = "admin";
   const navItems = navConfig[role];
 
   const isActive = (path) => pathname === path;
 
-  const getUser = async () => {
-    const token = Cookies.get("token") || localStorage.getItem("token");
-
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "GET",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!res.ok) throw new Error("Failed to fetch user");
-
-      const data = await res.json();
-      if (data && data.user) {
-        setUser(data.user);
-        // console.log("User state successfully set to:", data.user);
-      } else {
-        throw new Error("User object missing from API response payload");
-      }
-    } catch (error) {
-      // console.error("Auth error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    getUser();
-  }, []);
+    const fetchUser = async () => {
+      if (!user || loading) return;
+      try {
+        const res = await axios.get(`/api/login?userId=${user.id}`);
+        const data = res.data;
+        if (data && data.user) {
+          setUserData(data.user);
+        } else {
+          throw new Error("User object missing from API response payload");
+        }
+      } catch (error) {
+        // console.error("Auth error:", error);
+      }
+    };
 
-  // console.log("Current user state:", user); 
+    fetchUser();
+  }, [user, loading]);
+
+  // console.log("Current user state:", user);
   useEffect(() => {
     setMobileSidebarOpen(false); // close mobile sidebar on desktop toggle
   }, [pathname]);

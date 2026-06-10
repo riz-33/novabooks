@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import axios from "axios";
 import {
   BarChart,
   Bar,
@@ -46,43 +48,20 @@ interface DashboardData {
 
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  // const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const { user, loading } = useAuth();
 
   useEffect(() => {
-    async function fetchDashboardMetrics() {
-      try {
-        setLoading(true);
-
-        // 👈 Safety check preventing Server SSR breakdown crashes
-        const token =
-          typeof window !== "undefined" ? localStorage.getItem("token") : null;
-
-        // 💡 TEMPORARY DEBUG LOG
-        console.log("Current Outgoing Dashboard Token:", token);
-
-        const response = await fetch("/api/dashboard", {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token || ""}`, // Ensure no extra whitespace
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP network error: Code status ${response.status}`);
-        }
-
-        const payload = await response.json();
-        setData(payload);
-      } catch (err: any) {
-        setError(err.message || "Failed to load dashboard parameters.");
-      } finally {
-        setLoading(false);
-      }
+    if (!loading && user) {
+      // Axios me header already AuthContext handle kar chuka hai, just simple call karein
+      // Agar backend direct parameter mangta hai toh query string bhej dein:
+      axios
+        .get(`/api/dashboard?userId=${user.id}`)
+        .then((res) => setData(res.data))
+        .catch((err) => console.log(err));
     }
-
-    fetchDashboardMetrics();
-  }, []);
+  }, [user, loading]);
 
   // 1. Full-screen Loading State
   if (loading) {

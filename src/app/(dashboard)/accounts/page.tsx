@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import axios from "axios";
 import {
   Wallet,
   Plus,
@@ -53,36 +55,21 @@ export default function AccountsPage() {
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openModal, setOpenModal] = useState(false);
+  const { user } = useAuth();
 
   const fetchAccounts = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
-      const storedUser = localStorage.getItem("user");
-      const user = storedUser ? JSON.parse(storedUser) : null;
-
-      const currentUserId = user?._id || user?.id;
-
-      if (!currentUserId) {
-        console.warn("No user context found in localStorage.");
+      if (!user) {
+        console.warn("No user context found.");
         setLoading(false);
         return;
       }
 
-      const res = await fetch(`/api/accounts?userId=${currentUserId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await axios.get(`/api/accounts?userId=${user.id}`);
 
-      if (!res.ok) {
-        throw new Error(`Server responded with status ${res.status}`);
-      }
-
-      const data = await res.json();
-      setAccounts(data.accounts || []);
+      // const data = await res.data();
+      setAccounts(res.data.accounts || []);
     } catch (error) {
       console.error("Failed fetching accounts:", error);
     } finally {
@@ -92,7 +79,7 @@ export default function AccountsPage() {
 
   useEffect(() => {
     fetchAccounts();
-  }, []);
+  }, [user]);
 
   return (
     <div className="p-4 md:p-8 max-w-[1400px] mx-auto">
@@ -199,12 +186,13 @@ export default function AccountsPage() {
         isOpen={openModal}
         onClose={() => setOpenModal(false)}
         refreshAccounts={fetchAccounts}
+        user={user}
       />
     </div>
   );
 }
 
-function CreateAccountModal({ isOpen, onClose, refreshAccounts }) {
+function CreateAccountModal({ isOpen, onClose, refreshAccounts, user }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -215,40 +203,23 @@ function CreateAccountModal({ isOpen, onClose, refreshAccounts }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
-      setIsSubmitting(true);
-      const token = localStorage.getItem("token");
-      const storedUser = localStorage.getItem("user");
 
-      const user = storedUser ? JSON.parse(storedUser) : null;
-      const currentUserId = user?._id || user?.id;
-
-      if (!currentUserId) {
-        alert("Session expired or invalid user profile. Please log in again.");
-        return;
-      }
-
-      const res = await fetch("/api/accounts", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          userId: currentUserId, // Uses the safe fallback ID
-          name: formData.name,
-          type: formData.type,
-          balance: Number(formData.balance) || 0,
-        }),
+      const res = await axios.post("/api/accounts", {
+        userId: user?.id,
+        name: formData.name,
+        type: formData.type,
+        balance: Number(formData.balance) || 0,
       });
 
-      if (res.ok) {
+      if (res.data.success) {
         refreshAccounts();
         onClose();
         setFormData({ name: "", type: "Asset", balance: "" });
       } else {
-        const errorData = await res.json();
-        alert(errorData.error || "Failed to create account");
+        alert(res.data.error || "Failed to create account");
+        console.error("Account creation error:", res.data.error);
       }
     } catch (error) {
       console.error("Modal submission error:", error);
