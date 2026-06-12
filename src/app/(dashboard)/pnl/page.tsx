@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { Calendar, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import axios from "axios";
 
 interface FinanceItem {
   name: string;
@@ -20,6 +22,8 @@ interface DateRange {
 }
 
 export default function ProfitLoss() {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState<boolean>(true);
   const [reportData, setReportData] = useState<ReportData>({
     income: [],
     expenses: [],
@@ -33,60 +37,34 @@ export default function ProfitLoss() {
     end: new Date().toISOString().split("T")[0],
   });
 
-  const [loading, setLoading] = useState<boolean>(true);
-
-  // Safely extract target user parameters inside browser storage boundaries
-  const getUserId = () => {
-    if (typeof window === "undefined") return null;
-    const storedUser = localStorage.getItem("user");
-    const user = storedUser ? JSON.parse(storedUser) : null;
-    return user?._id || user?.id;
-  };
-
-  // Wrapped in useCallback to prevent infinite re-renders inside the hook dependency matrix
-  const fetchPL = useCallback(async () => {
-    const userId = getUserId();
-    if (!userId) return;
-
-    setLoading(true);
-    try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(
-        `/api/reports/profit-loss?userId=${userId}&start=${dateRange.start}&end=${dateRange.end}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!res.ok) throw new Error("Could not retrieve ledger statement records");
-
-      const data = await res.json();
-      setReportData({
-        income: data.income || [],
-        expenses: data.expenses || [],
-        netProfit: data.netProfit || 0,
-      });
-    } catch (err) {
-      console.error("P&L Fetch Error:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [dateRange.start, dateRange.end]);
-
   useEffect(() => {
-    fetchPL();
-  }, [fetchPL]);
+    if (user) {
+      axios
+        .get(
+          `/api/reports/profit-loss?userId=${user.id}&start=${dateRange.start}&end=${dateRange.end}`,
+        )
+        .then((res) => {
+          const data = res.data;
+          setReportData({
+            income: data.income || [],
+            expenses: data.expenses || [],
+            netProfit: data.netProfit || 0,
+          });
+        })
+        .catch((err) => console.error("P&L Fetch Error:", err))
+        .finally(() => setLoading(false));
+    }
+  }, [user, dateRange.start, dateRange.end]);
 
-  // Derived accounting calculations
   const totalIncome = reportData.income.reduce((s, a) => s + a.amount, 0);
   const totalExpenses = reportData.expenses.reduce((s, a) => s + a.amount, 0);
   const calculatedNetProfit = totalIncome - totalExpenses;
 
-  if (loading && reportData.income.length === 0 && reportData.expenses.length === 0) {
+  if (
+    loading &&
+    reportData.income.length === 0 &&
+    reportData.expenses.length === 0
+  ) {
     return (
       <div className="flex items-center justify-center min-h-[400px] font-black text-nova-navy tracking-widest text-sm animate-pulse">
         LOADING STATEMENT VOUCHERS...
@@ -133,7 +111,6 @@ export default function ProfitLoss() {
         </div>
       </div>
 
-      {/* Summary Banner */}
       <div
         className={`mb-12 p-5 rounded-[3rem] flex flex-col items-center justify-center text-center shadow-2xl transition-all duration-500 ${
           calculatedNetProfit >= 0
@@ -159,16 +136,18 @@ export default function ProfitLoss() {
         </div>
       </div>
 
-      {/* Income & Expense Breakdown Panels */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
         {/* Income Card */}
         <div className="bg-white p-8 md:p-10 rounded-[2.5rem] border border-gray-100 shadow-sm">
           <h3 className="text-lg font-black text-nova-navy mb-8 border-b border-gray-100 pb-4 flex justify-between items-center">
-            INCOME <span className="text-emerald-600 font-black text-xl">+</span>
+            INCOME{" "}
+            <span className="text-emerald-600 font-black text-xl">+</span>
           </h3>
           <div className="space-y-6">
             {reportData.income.length === 0 ? (
-              <p className="text-sm font-bold text-gray-400 italic">No revenue items logged.</p>
+              <p className="text-sm font-bold text-gray-400 italic">
+                No revenue items logged.
+              </p>
             ) : (
               reportData.income.map((item, i) => (
                 <PLLine
@@ -188,14 +167,15 @@ export default function ProfitLoss() {
           </div>
         </div>
 
-        {/* Expense Card */}
         <div className="bg-white p-8 md:p-10 rounded-[2.5rem] border border-gray-100 shadow-sm">
           <h3 className="text-lg font-black text-nova-navy mb-8 border-b border-gray-100 pb-4 flex justify-between items-center">
             EXPENSES <span className="text-rose-600 font-black text-xl">-</span>
           </h3>
           <div className="space-y-6">
             {reportData.expenses.length === 0 ? (
-              <p className="text-sm font-bold text-gray-400 italic">No expense entries logged.</p>
+              <p className="text-sm font-bold text-gray-400 italic">
+                No expense entries logged.
+              </p>
             ) : (
               reportData.expenses.map((item, i) => (
                 <PLLine

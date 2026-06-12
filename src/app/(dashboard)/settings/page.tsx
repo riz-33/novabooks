@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import axios from "axios";
 import {
   Bell,
   Globe,
@@ -17,6 +19,7 @@ import { useRouter } from "next/navigation";
 
 export default function SettingsPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [darkMode, setDarkMode] = useState(false);
   const [currencyPreference, setCurrencyPreference] = useState<boolean>(true);
   const [ledgerAlerts, setLedgerAlerts] = useState<boolean>(true);
@@ -30,7 +33,9 @@ export default function SettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
+    const fetchedUser = localStorage.getItem("user");
     const storedTheme = localStorage.getItem("theme");
+
     if (storedTheme === "dark") {
       setDarkMode(true);
       document.documentElement.classList.add("dark");
@@ -39,13 +44,12 @@ export default function SettingsPage() {
       document.documentElement.classList.remove("dark");
     }
 
-    if (typeof window !== "undefined") {
-      const storedUser = localStorage.getItem("user");
-      const user = storedUser ? JSON.parse(storedUser) : null;
+    if (fetchedUser) {
+      const user = JSON.parse(fetchedUser);
       setProfile({
-        fullName: user?.name || "Muhammad Rizwan",
-        email: user?.email || "rizwan@example.com",
-        companyName: user?.companyName || "Nova Solutions",
+        fullName: user.name?.toUpperCase() || "Muhammad Rizwan",
+        email: user.email || "rizwan@example.com",
+        companyName: user.companyName || "Nova Solutions",
       });
     }
   }, []);
@@ -67,9 +71,7 @@ export default function SettingsPage() {
     setIsSaving(true);
 
     try {
-      // Simulate API patch interaction duration latency
       await new Promise((resolve) => setTimeout(resolve, 600));
-
       localStorage.setItem(
         "user",
         JSON.stringify({

@@ -59,23 +59,11 @@ export default function DashboardLayout({ children }) {
   const isActive = (path) => pathname === path;
 
   useEffect(() => {
-    const fetchUser = async () => {
-      if (!user || loading) return;
-      try {
-        const res = await axios.get(`/api/login?userId=${user.id}`);
-        const data = res.data;
-        if (data && data.user) {
-          setUserData(data.user);
-        } else {
-          throw new Error("User object missing from API response payload");
-        }
-      } catch (error) {
-        // console.error("Auth error:", error);
-      }
-    };
-
-    fetchUser();
-  }, [user, loading]);
+    const fetchUser = localStorage.getItem("user");
+    if (fetchUser) {
+      setUserData(JSON.parse(fetchUser));
+    }
+  }, []);
 
   // console.log("Current user state:", user);
   useEffect(() => {

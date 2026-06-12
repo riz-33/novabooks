@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { Calendar, ShieldCheck, Scale, AlertCircle } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import axios from "axios";
 
 interface AccountLine {
   name: string;
@@ -15,6 +17,8 @@ interface BalanceSheetData {
 }
 
 export default function BalanceSheet() {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState<boolean>(true);
   const [data, setData] = useState<BalanceSheetData>({
     assets: [],
     liabilities: [],
@@ -23,50 +27,24 @@ export default function BalanceSheet() {
   const [asOfDate, setAsOfDate] = useState<string>(
     new Date().toISOString().split("T")[0],
   );
-  const [loading, setLoading] = useState<boolean>(true);
-
-  const getUserId = () => {
-    if (typeof window === "undefined") return null;
-    const storedUser = localStorage.getItem("user");
-    const user = storedUser ? JSON.parse(storedUser) : null;
-    return user?._id || user?.id;
-  };
-
-  const fetchBalanceSheet = useCallback(async () => {
-    const userId = getUserId();
-    if (!userId) return;
-
-    setLoading(true);
-    try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(
-        `/api/reports/balance-sheet?userId=${userId}&date=${asOfDate}`,
-        {
-          method: "GET",
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
-
-      if (!res.ok) throw new Error("Failed to gather balance sheet metrics.");
-      const result = await res.json();
-
-      setData({
-        assets: result.assets || [],
-        liabilities: result.liabilities || [],
-        equity: result.equity || [],
-      });
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [asOfDate]);
 
   useEffect(() => {
-    fetchBalanceSheet();
-  }, [fetchBalanceSheet]);
+    if (user) {
+      axios
+        .get(`/api/reports/balance-sheet?userId=${user.id}&date=${asOfDate}`)
+        .then((res) => {
+          const result = res.data;
+          setData({
+            assets: result.assets || [],
+            liabilities: result.liabilities || [],
+            equity: result.equity || [],
+          });
+        })
+        .catch((err) => console.error(err))
+        .finally(() => setLoading(false));
+    }
+  }, [user, asOfDate]);
 
-  // Aggregate Category Totals
   const totalAssets = data.assets.reduce((sum, item) => sum + item.amount, 0);
   const totalLiabilities = data.liabilities.reduce(
     (sum, item) => sum + item.amount,
@@ -114,7 +92,6 @@ export default function BalanceSheet() {
         </div>
       </div>
 
-      {/* EQUATION INTEGRITY CHECK BANNER */}
       <div
         className={`mb-8 p-4 rounded-2xl border flex items-center gap-3 transition-colors ${
           isBalanced
@@ -141,9 +118,7 @@ export default function BalanceSheet() {
         </div>
       </div>
 
-      {/* THREE COLUMN GRID LAYOUT */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-        {/* LEFT COLUMN: ASSETS */}
         <div className="bg-white p-6 md:p-8 rounded-[2rem] border border-gray-100 shadow-sm h-full">
           <h3 className="text-lg font-black text-nova-navy mb-6 border-b pb-3 flex justify-between">
             ASSETS <Scale size={18} className="text-slate-400" />
@@ -165,9 +140,7 @@ export default function BalanceSheet() {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: LIABILITIES & EQUITY */}
         <div className="space-y-8">
-          {/* LIABILITIES SUB-SECTION */}
           <div className="bg-white p-6 md:p-8 rounded-[2rem] border border-gray-100 shadow-sm">
             <h3 className="text-lg font-black text-nova-navy mb-6 border-b pb-3">
               LIABILITIES
@@ -189,7 +162,6 @@ export default function BalanceSheet() {
             </div>
           </div>
 
-          {/* EQUITY SUB-SECTION */}
           <div className="bg-white p-6 md:p-8 rounded-[2rem] border border-gray-100 shadow-sm">
             <h3 className="text-lg font-black text-nova-navy mb-6 border-b pb-3">
               EQUITY
@@ -211,7 +183,6 @@ export default function BalanceSheet() {
             </div>
           </div>
 
-          {/* LIABILITIES + EQUITY TOTAL CONSOLIDATION VOUCHER */}
           <div className="bg-nova-navy text-white p-6 rounded-2xl flex justify-between items-center shadow-lg">
             <span className="text-xs font-black uppercase tracking-widest opacity-80">
               Total Liabilities & Equity

@@ -54,8 +54,6 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      // Axios me header already AuthContext handle kar chuka hai, just simple call karein
-      // Agar backend direct parameter mangta hai toh query string bhej dein:
       axios
         .get(`/api/dashboard?userId=${user.id}`)
         .then((res) => setData(res.data))

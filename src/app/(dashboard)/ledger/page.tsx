@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import axios from "axios";
 import {
   ArrowUpRight,
   ArrowDownLeft,
@@ -21,8 +23,8 @@ export default function LedgerPage() {
   const [accounts, setAccounts] = useState<AccountOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
+  const { user } = useAuth();
 
-  // Quick transaction state tracking double-entry legs
   const [description, setDescription] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [lines, setLines] = useState([
@@ -30,84 +32,57 @@ export default function LedgerPage() {
     { accountId: "", type: "Credit" as const, amount: "" },
   ]);
 
-  const getUserId = () => {
-    const storedUser = localStorage.getItem("user");
-    const user = storedUser ? JSON.parse(storedUser) : null;
-    return user?._id || user?.id;
-  };
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const userId = getUserId();
-      const token = localStorage.getItem("token");
-      if (!userId) return;
-
-      const [txRes, accRes] = await Promise.all([
-        fetch(`/api/transactions?userId=${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch(`/api/accounts?userId=${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-      ]);
-
-      const txData = await txRes.json();
-      const accData = await accRes.json();
-
-      setTransactions(txData.transactions || []);
-      setAccounts(accData.accounts || []);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   const handlePostTransaction = async (e: React.FormEvent) => {
     e.preventDefault();
-    const userId = getUserId();
-    const token = localStorage.getItem("token");
+    const userId = user?.id;
 
     const validatedLines = lines.map((l) => ({
       accountId: l.accountId,
       type: l.type,
       amount: Number(l.amount),
     }));
-
     try {
-      const res = await fetch("/api/transactions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
+      const res = await axios.post(
+        "/api/transactions",
+        {
           description,
           date,
           journalLines: validatedLines,
           userId,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
       setDescription("");
       setLines([
         { accountId: "", type: "Debit", amount: "" },
         { accountId: "", type: "Credit", amount: "" },
       ]);
       setShowAddForm(false);
-      fetchData();
+      setTransactions((prev) => [...prev, res.data.transaction]);
     } catch (err: any) {
-      alert(err.message || "Failed to post transaction");
+      alert(err.response?.data?.error || "Failed to post transaction");
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      axios
+        .all([
+          axios.get(`/api/transactions?userId=${user.id}`),
+          axios.get(`/api/accounts?userId=${user.id}`),
+        ])
+        .then((res) => {
+          setTransactions(res[0].data.transactions || []);
+          setAccounts(res[1].data.accounts || []);
+        })
+        .catch((err) => console.error(err))
+        .finally(() => setLoading(false));
+    }
+  }, [user]);
 
   return (
     <div className="p-8 max-w-[1400px] mx-auto">
@@ -128,7 +103,6 @@ export default function LedgerPage() {
         </button>
       </div>
 
-      {/* DYNAMIC QUICK ENTRY DOUBLE-ENTRY FORM */}
       {showAddForm && (
         <form
           onSubmit={handlePostTransaction}
