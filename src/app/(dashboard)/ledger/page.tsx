@@ -97,7 +97,7 @@ export default function LedgerPage() {
         </div>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="flex items-center gap-2 bg-nova-navy text-white px-6 py-3 rounded-2xl font-bold shadow-md hover:bg-blue-900 transition-all"
+          className="flex items-center gap-2 bg-nova-navy dark:bg-nova-gold text-white dark:text-nova-navy px-6 py-3 rounded-2xl font-bold shadow-md transition-all"
         >
           <Plus size={18} /> {showAddForm ? "Hide Form" : "New Transaction"}
         </button>
@@ -106,7 +106,7 @@ export default function LedgerPage() {
       {showAddForm && (
         <form
           onSubmit={handlePostTransaction}
-          className="bg-white border border-gray-100 shadow-sm p-6 rounded-[2rem] mb-8 space-y-4"
+          className="bg-white border border-gray-100 shadow-sm p-6 rounded-[2rem] mb-8 space-y-4 dark:bg-slate-800 dark:border-slate-700"
         >
           <h3 className="text-xl font-black text-nova-navy mb-2">
             Record Double-Entry Journal Entry
@@ -118,14 +118,14 @@ export default function LedgerPage() {
               placeholder="Transaction Memo/Description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="px-4 py-3 rounded-xl bg-slate-50 border border-transparent focus:border-nova-navy outline-none w-full"
+              className="px-4 py-3 rounded-xl bg-slate-50 border border-gray-200 focus:border-nova-navy outline-none w-full dark:bg-slate-800 dark:text-white"
             />
             <input
               required
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="px-4 py-3 rounded-xl bg-slate-50 border border-transparent focus:border-nova-navy outline-none w-full"
+              className="px-4 py-3 rounded-xl bg-slate-50 border border-gray-200 focus:border-nova-navy outline-none w-full dark:bg-slate-800 dark:text-white"
             />
           </div>
 
@@ -133,7 +133,7 @@ export default function LedgerPage() {
             {lines.map((line, idx) => (
               <div
                 key={idx}
-                className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center bg-slate-50 p-4 rounded-xl"
+                className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center bg-slate-50 p-4 rounded-xl dark:bg-slate-800 dark:text-white"
               >
                 <select
                   required
@@ -143,7 +143,7 @@ export default function LedgerPage() {
                     newLines[idx].accountId = e.target.value;
                     setLines(newLines);
                   }}
-                  className="px-3 py-2 rounded-lg bg-white border border-gray-200 outline-none"
+                  className="px-3 py-2 rounded-lg bg-white border border-gray-200 outline-none font-bold dark:bg-slate-700 dark:text-white"
                 >
                   <option value="">-- Select Account --</option>
                   {accounts.map((a) => (
@@ -160,7 +160,7 @@ export default function LedgerPage() {
                     newLines[idx].type = e.target.value as "Debit" | "Credit";
                     setLines(newLines);
                   }}
-                  className="px-3 py-2 rounded-lg bg-white border border-gray-200 outline-none font-bold"
+                  className="px-3 py-2 rounded-lg bg-white border border-gray-200 outline-none font-bold dark:bg-slate-700 dark:text-white"
                 >
                   <option value="Debit">Debit</option>
                   <option value="Credit">Credit</option>
@@ -177,7 +177,7 @@ export default function LedgerPage() {
                     newLines[idx].amount = e.target.value;
                     setLines(newLines);
                   }}
-                  className="px-3 py-2 rounded-lg bg-white border border-gray-200 outline-none text-right font-bold"
+                  className="px-3 py-2 rounded-lg bg-white border border-gray-200 outline-none text-right font-bold dark:bg-slate-700 dark:text-white"
                 />
 
                 {lines.length > 2 && (
@@ -208,7 +208,7 @@ export default function LedgerPage() {
             </button>
             <button
               type="submit"
-              className="bg-nova-navy text-white px-6 py-2.5 rounded-xl font-bold shadow-md hover:bg-blue-900 transition-all"
+              className="bg-nova-navy dark:bg-nova-gold text-white dark:text-nova-navy px-6 py-2.5 rounded-xl font-bold shadow-md transition-all"
             >
               Post to Book
             </button>
@@ -217,7 +217,7 @@ export default function LedgerPage() {
       )}
 
       {/* LEDGER TRANSACTION MANAGEMENT MATRIX */}
-      <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden dark:bg-slate-800 dark:border-slate-700">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-gray-50/70 border-b border-gray-100">

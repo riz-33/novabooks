@@ -1,29 +1,17 @@
 import { NextResponse } from "next/server";
-import connectDB from "@/lib/db";
 import Transaction from "@/models/Transaction";
-import Account from "@/models/Account";
+import { withAuth } from "@/lib/auth";
 
-export async function GET(req: Request) {
+export const GET = withAuth(async (req: Request, { userId }) => {
   try {
-    await connectDB();
     const { searchParams } = new URL(req.url);
 
-    const userId = searchParams.get("userId");
     const asOfDateStr = searchParams.get("date");
 
-    if (!userId) {
-      return NextResponse.json(
-        { error: "User ID is required" },
-        { status: 400 },
-      );
-    }
-
-    // Capture everything from inception up to 23:59:59 on the target date
     const asOfDate = asOfDateStr
       ? new Date(`${asOfDateStr}T23:59:59.999Z`)
       : new Date();
 
-    // 1️⃣ Fetch all historic transactions up to the point-in-time date boundary
     const transactions = await Transaction.find({
       userId,
       date: { $lte: asOfDate },
@@ -31,15 +19,12 @@ export async function GET(req: Request) {
       .populate("journalLines.accountId", "name type")
       .lean();
 
-    // 2️⃣ Initialize storage buckets for balance mapping
     const assetsMap: Record<string, number> = {};
     const liabilitiesMap: Record<string, number> = {};
     const equityMap: Record<string, number> = {};
 
-    // Tracks retained earnings from Income & Expense lines dynamically
     let dynamicRetainedEarnings = 0;
 
-    // 3️⃣ Compute snapshot calculations across the ledger splits
     for (const tx of transactions) {
       for (const line of tx.journalLines) {
         const account = line.accountId as any;
@@ -66,7 +51,6 @@ export async function GET(req: Request) {
             break;
 
           case "Income":
-            // Net profit items feed directly into Retained Earnings
             dynamicRetainedEarnings +=
               line.type === "Credit" ? amount : -amount;
             break;
@@ -78,13 +62,11 @@ export async function GET(req: Request) {
       }
     }
 
-    // 4️⃣ Incorporate generated Retained Earnings into the Equity framework
     if (dynamicRetainedEarnings !== 0) {
       equityMap["Retained Earnings"] =
         (equityMap["Retained Earnings"] || 0) + dynamicRetainedEarnings;
     }
 
-    // Convert mappings to clean structural arrays
     const assets = Object.entries(assetsMap).map(([name, amount]) => ({
       name,
       amount,
@@ -105,4 +87,4 @@ export async function GET(req: Request) {
       { status: 500 },
     );
   }
-}
+});

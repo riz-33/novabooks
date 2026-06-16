@@ -1,9 +1,9 @@
+import { NextResponse } from "next/server";
 import Account from "@/models/Account";
 import Transaction from "@/models/Transaction";
 import connectDB from "@/lib/db";
-import { NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
+import { withAuth } from "@/lib/auth";
 
 export async function POST(req: Request) {
   const session = await mongoose.startSession();
@@ -104,28 +104,8 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET(req: Request) {
+export const GET = withAuth(async (req: Request, { userId }) => {
   try {
-    await connectDB();
-    const { searchParams } = new URL(req.url);
-    let userId = searchParams.get("userId");
-
-    if (!userId) {
-      const authHeader = req.headers.get("authorization");
-      if (authHeader && authHeader.startsWith("Bearer ")) {
-        const token = authHeader.split(" ")[1];
-        const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
-        userId = decoded.id;
-      }
-    }
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: "Authentication or User ID is required" },
-        { status: 400 },
-      );
-    }
-
     const accounts = await Account.find({ userId })
       .sort({ createdAt: -1 })
       .lean();
@@ -133,32 +113,4 @@ export async function GET(req: Request) {
   } catch (error: any) {
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
-}
-
-export async function DELETE(req: Request) {
-  try {
-    await connectDB();
-    const { searchParams } = new URL(req.url);
-    const accountId = searchParams.get("accountId");
-
-    if (!accountId) {
-      return NextResponse.json(
-        { error: "Account ID is required" },
-        { status: 400 },
-      );
-    }
-
-    const deletedAccount = await Account.findByIdAndDelete(accountId);
-    if (!deletedAccount) {
-      return NextResponse.json({ error: "Account not found" }, { status: 404 });
-    }
-
-    return NextResponse.json(
-      { message: "Account deleted successfully" },
-      { status: 200 },
-    );
-  } catch (error: any) {
-    console.log(error);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
-  }
-}
+});

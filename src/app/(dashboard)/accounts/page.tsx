@@ -96,7 +96,7 @@ export default function AccountsPage() {
 
         <button
           onClick={() => setOpenModal(true)}
-          className="flex items-center justify-center gap-2 bg-nova-navy text-white px-6 py-3 rounded-2xl font-bold hover:bg-blue-900 transition-all shadow-lg active:scale-95"
+          className="cursor-pointer flex items-center justify-center gap-2 bg-nova-navy dark:bg-nova-gold text-white dark:text-nova-navy px-6 py-3 rounded-2xl font-bold transition-all shadow-lg active:scale-95"
         >
           <Plus size={18} />
           Add Account
@@ -129,7 +129,7 @@ export default function AccountsPage() {
 
           <button
             onClick={() => setOpenModal(true)}
-            className="mt-6 bg-nova-navy text-white px-6 py-3 rounded-2xl font-bold"
+            className="cursor-pointer mt-6 bg-nova-navy dark:bg-nova-gold text-white dark:text-nova-navy px-6 py-3 rounded-2xl font-bold"
           >
             Add Account
           </button>
@@ -205,7 +205,6 @@ function CreateAccountModal({ isOpen, onClose, refreshAccounts, user }) {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-
       const res = await axios.post("/api/accounts", {
         userId: user?.id,
         name: formData.name,

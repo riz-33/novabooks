@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Transaction from "@/models/Transaction";
 import Account from "@/models/Account";
+import { withAuth } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
@@ -68,20 +69,8 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET(req: Request) {
+export const GET = withAuth(async (req: Request, { userId }) => {
   try {
-    await connectDB();
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: "User ID is required" },
-        { status: 400 },
-      );
-    }
-
-    // Populate Account references inside your nested array lines
     const transactions = await Transaction.find({ userId })
       .populate("journalLines.accountId", "name type")
       .sort({ date: -1 })
@@ -91,4 +80,4 @@ export async function GET(req: Request) {
   } catch (error: any) {
     return NextResponse.json({ error: "Server Error" }, { status: 500 });
   }
-}
+});

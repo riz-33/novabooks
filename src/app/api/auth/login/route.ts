@@ -11,7 +11,6 @@ export async function POST(req: Request) {
     const email = body.email.toLowerCase().trim();
     const password = body.password;
 
-    // 1. Find user
     const user = await User.findOne({ email });
     if (!user) {
       return NextResponse.json(
@@ -20,7 +19,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // 2. Check password
     const isMatch = await compare(password, user.password);
     if (!isMatch) {
       return NextResponse.json(
@@ -29,14 +27,12 @@ export async function POST(req: Request) {
       );
     }
 
-    // 3. Create JWT Token
     const token = jwt.sign(
       { userId: user._id, email: user.email },
       process.env.JWT_SECRET!,
       { expiresIn: "1d" },
     );
 
-    // 4. Send response
     return NextResponse.json(
       {
         message: "Login successful",
